@@ -38,7 +38,7 @@ class GeminiChatService
         if (empty($apiKey)) {
             return [
                 'status' => true,
-                'reply' => "⚠️ **Kunci API Gemini (GEMINI_API_KEY) belum dikonfigurasi pada sistem.**\n\nUntuk mengaktifkan asisten AI secara penuh, silakan pastikan `GEMINI_API_KEY` telah diatur pada file `.env`.",
+                'reply' => 'Asisten AI belum tersedia. Silakan coba lagi nanti atau hubungi pengelola.',
                 'mode' => $isDocumentMode ? 'document' : 'universal',
                 'publication' => $publication ? ['id' => $publication->id, 'title' => $publication->title] : null,
             ];
@@ -60,7 +60,7 @@ class GeminiChatService
                 ] : null,
             ];
         } catch (\Exception $e) {
-            Log::error('GeminiChatService Error: ' . $e->getMessage());
+            Log::warning('Gemini chat request failed.', ['exception_type' => get_class($e)]);
 
             // Fallback response jika terjadi kendala jaringan/kuota API
             $fallbackReply = $this->generateFallbackReply($userMessage, $publication, $isDocumentMode);
@@ -70,7 +70,7 @@ class GeminiChatService
                 'reply' => $fallbackReply,
                 'mode' => $isDocumentMode ? 'document' : 'universal',
                 'publication' => $publication ? ['id' => $publication->id, 'title' => $publication->title] : null,
-                'error' => $e->getMessage(),
+                'error' => 'Layanan AI sedang tidak tersedia.',
             ];
         }
     }
@@ -246,7 +246,7 @@ PANDUAN MENJAWAB:
      */
     private function callGeminiApi(string $apiKey, string $model, string $systemInstruction, array $contents): string
     {
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
         $payload = [
             'system_instruction' => [
@@ -261,7 +261,8 @@ PANDUAN MENJAWAB:
             ]
         ];
 
-        $response = Http::withoutVerifying()->withHeaders([
+        $response = Http::withHeaders([
+            'x-goog-api-key' => $apiKey,
             'Content-Type' => 'application/json',
         ])->timeout(35)->post($endpoint, $payload);
 
@@ -288,7 +289,7 @@ PANDUAN MENJAWAB:
      */
     private function callGeminiApiLegacy(string $apiKey, string $model, string $systemInstruction, array $contents): string
     {
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
         if (!empty($contents) && isset($contents[0]['parts'][0]['text'])) {
             $contents[0]['parts'][0]['text'] = "[INSTRUKSI SISTEM UTAMA]:\n" . $systemInstruction . "\n\n[PESAN PENGGUNA]:\n" . $contents[0]['parts'][0]['text'];
@@ -302,7 +303,8 @@ PANDUAN MENJAWAB:
             ]
         ];
 
-        $response = Http::withoutVerifying()->withHeaders([
+        $response = Http::withHeaders([
+            'x-goog-api-key' => $apiKey,
             'Content-Type' => 'application/json',
         ])->timeout(35)->post($endpoint, $payload);
 

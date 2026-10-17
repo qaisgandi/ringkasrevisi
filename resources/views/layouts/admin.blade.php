@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistem Ringkasan & Manajemen Publikasi Statistik BPS')</title>
     <!-- Google Fonts: Inter & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
@@ -33,11 +30,12 @@
         }
     </style>
     <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
 </head>
-<body class="bg-bps-bg text-slate-800 antialiased min-h-screen flex">
+<body class="rk-app rk-admin bg-bps-bg text-slate-800 antialiased min-h-screen flex">
 
-    <!-- MOBILE SIDEBAR OVERLAY -->
+    <a class="rk-skip" href="#konten">Lewati navigasi</a>
+<!-- MOBILE SIDEBAR OVERLAY -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity duration-300"></div>
 
     <!-- SIDEBAR LEFT -->
@@ -61,13 +59,13 @@
         </div>
 
         @php
-            $isDashboardActive = ($activeMenu ?? '') === 'dashboard';
-            $isDaftarActive = ($activeMenu ?? '') === 'publications' && !request()->routeIs('publications.create') && request('status') !== 'Selesai' && !request()->has('category');
+            $isDashboardActive = request()->routeIs('admin.dashboard') && request('view') !== 'statistics';
+            $isDaftarActive = request()->routeIs('publications.*') && !request()->routeIs('publications.create') && !request()->has('category');
             $isUploadActive = request()->routeIs('publications.create');
-            $isKategoriActive = request()->has('category');
-            $isRingkasanActive = ($activeMenu ?? '') === 'summaries' || request()->routeIs('admin.summaries') || (request()->routeIs('publications.index') && request('status') === 'Selesai');
+            $isKategoriActive = request()->routeIs('publications.index') && request()->has('category');
+            $isRingkasanActive = ($activeMenu ?? '') === 'summaries' || request()->routeIs('admin.summaries');
             $isPencarianActive = false;
-            $isStatistikActive = request()->routeIs('admin.dashboard') && ($activeMenu ?? '') === 'dashboard';
+            $isStatistikActive = request()->routeIs('admin.dashboard') && request('view') === 'statistics';
             $isAktivitasActive = ($activeMenu ?? '') === 'activities' || request()->routeIs('activities.index');
             $isPengaturanActive = ($activeMenu ?? '') === 'account_settings' || request()->routeIs('account.settings');
             $isManajemenActive = ($activeMenu ?? '') === 'user_management' || request()->routeIs('users.*');
@@ -81,7 +79,7 @@
 
         <!-- Sidebar Navigation Menu -->
         <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-            <a href="{{ route('admin.dashboard') }}" class="{{ $isDashboardActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('admin.dashboard') }}" aria-current="{{ $isDashboardActive ? 'page' : 'false' }}" class="{{ $isDashboardActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                 </svg>
@@ -91,14 +89,14 @@
             <!-- PUBLIKASI SECTION -->
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 pt-5 pb-2 select-none">Publikasi</div>
 
-            <a href="{{ route('publications.index') }}" class="{{ $isDaftarActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('publications.index') }}" aria-current="{{ $isDaftarActive ? 'page' : 'false' }}" class="{{ $isDaftarActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 <span class="text-sm">Daftar Publikasi</span>
             </a>
 
-            <a href="{{ route('publications.create') }}" class="{{ $isUploadActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('publications.create') }}" aria-current="{{ $isUploadActive ? 'page' : 'false' }}" class="{{ $isUploadActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
@@ -125,7 +123,7 @@
                     @else
                         @foreach ($sidebarCategories as $cat)
                             @php
-                                $isThisCategoryActive = request('category') === $cat->category;
+                                $isThisCategoryActive = request()->routeIs('publications.index') && request('category') === $cat->category;
                             @endphp
                             <a 
                                 href="{{ route('publications.index', ['category' => $cat->category]) }}" 
@@ -142,7 +140,7 @@
             <!-- RINGKASAN SECTION -->
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 pt-5 pb-2 select-none">Ringkasan</div>
 
-            <a href="{{ route('admin.summaries') }}" class="{{ $isRingkasanActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('admin.summaries') }}" aria-current="{{ $isRingkasanActive ? 'page' : 'false' }}" class="{{ $isRingkasanActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
@@ -152,14 +150,14 @@
             <!-- LAPORAN SECTION -->
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 pt-5 pb-2 select-none">Laporan</div>
 
-            <a href="{{ route('admin.dashboard') }}" class="{{ $isStatistikActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('admin.dashboard', ['view' => 'statistics']) }}" aria-current="{{ $isStatistikActive ? 'page' : 'false' }}" class="{{ $isStatistikActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21h12a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <span class="text-sm">Statistik Ringkasan</span>
             </a>
 
-            <a href="{{ route('activities.index') }}" class="{{ $isAktivitasActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('activities.index') }}" aria-current="{{ $isAktivitasActive ? 'page' : 'false' }}" class="{{ $isAktivitasActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -169,14 +167,14 @@
             <!-- PENGATURAN SECTION -->
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-4 pt-5 pb-2 select-none">Pengaturan</div>
  
-            <a href="{{ route('account.settings') }}" class="{{ $isPengaturanActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('account.settings') }}" aria-current="{{ $isPengaturanActive ? 'page' : 'false' }}" class="{{ $isPengaturanActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span class="text-sm">Pengaturan Akun</span>
             </a>
  
-            <a href="{{ route('users.index') }}" class="{{ $isManajemenActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <a href="{{ route('users.index') }}" aria-current="{{ $isManajemenActive ? 'page' : 'false' }}" class="{{ $isManajemenActive ? 'bg-[#1e5eff] text-white shadow-md shadow-blue-500/10 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.04] font-medium' }} flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
                 <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
@@ -187,7 +185,7 @@
         <!-- Sidebar Profile (Bottom Section) -->
         <div class="p-4 border-t border-white/[0.05] shrink-0 relative">
             <!-- Profile Card -->
-            <div id="profile-card" class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#111e36]/60 border border-white/[0.04] cursor-pointer hover:bg-[#111e36]/90 transition-all duration-200">
+            <div id="profile-card" role="button" tabindex="0" aria-expanded="false" aria-controls="profile-dropdown" class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#111e36]/60 border border-white/[0.04] cursor-pointer hover:bg-[#111e36]/90 transition-all duration-200">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-9 h-9 rounded-full bg-[#1e5eff] text-white flex items-center justify-center shadow-sm select-none shrink-0">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -226,7 +224,7 @@
         <header class="h-20 bg-bps-navy border-b border-white/5 flex items-center justify-between px-6 md:px-8 z-30 sticky top-0 shrink-0 shadow-md shadow-black/5">
             <div class="flex items-center gap-4">
                 <!-- Hamburger Menu for Mobile -->
-                <button id="sidebar-toggle" class="md:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 focus:outline-none" title="Buka Menu">
+                <button id="sidebar-toggle" aria-controls="sidebar" aria-expanded="false" class="md:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/5 focus:outline-none" title="Buka Menu">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -248,8 +246,8 @@
                     <input 
                         type="text" 
                         name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Cari judul / kategori..." 
+                        value="{{ request()->routeIs('publications.index') ? request('search') : '' }}"
+                        aria-label="Cari di seluruh publikasi" placeholder="Cari semua publikasi..." 
                         class="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:bg-white/10 focus:border-bps-primary focus:ring-2 focus:ring-blue-500/30 transition-all duration-200"
                     >
                 </form>
@@ -346,7 +344,7 @@
         </header>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main id="konten" class="flex-1 p-6 md:p-8 overflow-y-auto">
             @yield('content')
         </main>
 

@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.settings.update') }}" method="POST" class="space-y-5">
+            <form action="{{ route('account.settings.update') }}" method="POST" data-submit-state class="space-y-5">
                 @csrf
                 
                 <!-- Nama Lengkap -->
@@ -134,7 +134,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.settings.password') }}" method="POST" class="space-y-4">
+            <form action="{{ route('account.settings.password') }}" method="POST" data-submit-state class="space-y-4">
                 @csrf
                 
                 <!-- Password Lama -->
@@ -173,10 +173,10 @@
                         <input 
                             type="password" 
                             name="password" 
-                            id="password" 
+                             minlength="12" maxlength="128" autocomplete="new-password" id="password" 
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
-                            placeholder="Min. 6 karakter"
+                            placeholder="Min. 12 karakter"
                         >
                         <button 
                             type="button" 
@@ -227,7 +227,7 @@
                 <div class="pt-2">
                     <button 
                         type="submit" 
-                        class="w-full px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        class="w-full px-5 py-3 bg-bps-navy hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />

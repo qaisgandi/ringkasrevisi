@@ -154,6 +154,8 @@
 @section('title', $publication->title)
 
 @section('content')
+@vite('resources/js/pdf.js')
+<div class="rk-reading">
     <div class="max-w-7xl w-full mx-auto px-4 py-8 md:py-12 space-y-8">
         
         <!-- Top Navigation / Breadcrumbs -->
@@ -532,18 +534,16 @@
     </div> <!-- Close Outer Div -->
 
     <!-- Include PDF.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
 
             // PDF.js Cover Page Rendering
             const canvas = document.getElementById('pdf-cover-canvas');
             const placeholder = document.getElementById('pdf-cover-placeholder');
-            const pdfUrl = '{{ Storage::url($publication->pdf_path) }}';
+            const pdfUrl = '{{ route('publications.file', $publication) }}';
 
             if (pdfUrl) {
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
 
@@ -580,4 +580,5 @@
             }
         });
     </script>
+</div>
 @endsection

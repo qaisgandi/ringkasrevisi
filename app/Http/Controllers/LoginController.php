@@ -31,8 +31,8 @@ class LoginController extends Controller
     {
         // Validasi input form
         $request->validate([
-            'username' => 'required',
-            'password' => 'required',
+            'username' => 'required|string|max:255',
+            'password' => 'required|string|max:1024',
         ], [
             'username.required' => 'Username wajib diisi.',
             'password.required' => 'Password wajib diisi.',
@@ -82,13 +82,13 @@ class LoginController extends Controller
     public function dashboard()
     {
         // Mengambil statistik riil dari database
-        $publications = Publication::all();
+        $publications = Publication::with('aiResult')->get();
         $totalPublications = $publications->count();
         $totalCategories = $publications->unique('category')->count();
         $recentPublications = $publications->sortByDesc('created_at')->take(5);
 
         // 1. Total ringkasan (status = Selesai)
-        $totalSummaries = $publications->where('status', 'Selesai')->count();
+        $totalSummaries = $publications->where('status', 'Selesai')->filter(fn ($pub) => $pub->aiResult !== null)->count();
 
         // 2. Publikasi per kategori
         $categories = [
@@ -109,12 +109,12 @@ class LoginController extends Controller
         // 3. Ringkasan per bulan (6 bulan terakhir)
         $monthlyData = [];
         for ($i = 5; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
+            $date = now()->startOfMonth()->subMonths($i);
             $monthKey = $date->format('Y-m'); // e.g. "2026-07"
             $monthLabel = $date->format('M Y'); // e.g. "Jul 2026"
             
             $count = $publications->where('status', 'Selesai')->filter(function($pub) use ($monthKey) {
-                return $pub->created_at->format('Y-m') === $monthKey;
+                return $pub->aiResult && $pub->aiResult->created_at->format('Y-m') === $monthKey;
             })->count();
             
             $monthlyData[$monthLabel] = $count;
@@ -270,12 +270,12 @@ class LoginController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'old_password' => 'required',
-            'password' => 'required|string|min:6|confirmed',
+            'old_password' => 'required|string|max:1024',
+            'password' => 'required|string|min:12|max:128|confirmed',
         ], [
             'old_password.required' => 'Password lama wajib diisi.',
             'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password baru minimal harus 6 karakter.',
+            'password.min' => 'Password baru minimal harus 12 karakter.',
             'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
         ]);
 
@@ -283,10 +283,13 @@ class LoginController extends Controller
             return back()->withErrors(['old_password' => 'Password lama yang Anda masukkan salah.']);
         }
 
-        $user->update([
+        $user->forceFill([
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-        ]);
+            'remember_token' => \Illuminate\Support\Str::random(60),
+        ])->save();
 
+        $request->session()->regenerate();
+        $request->session()->put('password_hash_web', $user->password);
         // Catat aktivitas sistem
         \App\Models\Notification::create([
             'title' => 'Password Akun Diubah',

@@ -6,12 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Portal RINGKAS') - Badan Pusat Statistik</title>
     <!-- Google Fonts: Inter & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Lucide Icons CDN -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -38,12 +35,12 @@
         @yield('styles')
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#fcfdfe] text-slate-800 antialiased">
+<body class="rk-app rk-user min-h-screen flex flex-col bg-[#fcfdfe] text-slate-800 antialiased">
 
     <!-- HEADER NAVIGATION -->
     <header class="h-20 bg-bps-navy border-b border-white/5 flex items-center justify-between px-4 md:px-12 sticky top-0 z-50 shrink-0 shadow-md shadow-black/5">
         <!-- Logo Brand Left -->
-        <div class="flex items-center gap-3">
+        <a href="{{ route('home') }}" class="flex items-center gap-3">
             <div class="w-12 h-8 shrink-0 flex items-center justify-center">
                 <img src="{{ asset('images/logo-bps.svg') }}" alt="Logo BPS" class="w-full h-full object-contain">
             </div>
@@ -51,10 +48,10 @@
                 <h1 class="heading-font text-base font-black text-white leading-none tracking-tight">RINGKAS</h1>
                 <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">SISTEM RINGKASAN PUBLIKASI STATISTIK BPS</span>
             </div>
-        </div>
+        </a>
 
         <!-- Center Menu Nav -->
-        <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold">
+        <nav class="flex items-center gap-4 text-sm font-semibold">
             @php
                 $isBerandaActive = request()->routeIs('home');
                 $isProfilActive = request()->routeIs('profile');
@@ -80,8 +77,9 @@
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="flex-1">
+    <a class="rk-skip" href="#konten">Lewati navigasi</a>
+<!-- Main Content Area -->
+    <main id="konten" class="flex-1">
         @yield('content')
     </main>
 
@@ -93,7 +91,7 @@
 
     <!-- Initialize Lucide Icons -->
     <script>
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
     </script>
     @yield('scripts')
 </body>

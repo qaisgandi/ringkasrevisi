@@ -16,6 +16,7 @@ class PublicationController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'status' => 'nullable|string|max:32']);
 
         $query = Publication::query();
 
@@ -88,13 +89,13 @@ class PublicationController extends Controller
             }
             
             // Membuat nama file yang unik dengan timestamp
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $filename = (string) \Illuminate\Support\Str::uuid() . '.pdf';
             
             // Menyimpan file ke storage/app/public/publications
-            $pdfPath = $file->storeAs('publications', $filename, 'public');
+            $pdfPath = $file->storeAs('publications', $filename, 'publications');
 
             // Ekstraksi jumlah halaman dan ukuran file saat diupload
-            $absolutePath = storage_path('app/public/' . $pdfPath);
+            $absolutePath = Storage::disk('publications')->path($pdfPath);
             
             $fileBytes = @filesize($absolutePath) ?: 0;
             if ($fileBytes >= 1048576) {
@@ -105,8 +106,8 @@ class PublicationController extends Controller
                 $calculatedSize = $fileBytes . ' B';
             }
 
-            $fileSize = $request->input('file_size', $calculatedSize);
-            $pageCount = $request->input('page_count');
+            $fileSize = $calculatedSize;
+            $pageCount = null;
             if (empty($pageCount) || !is_numeric($pageCount)) {
                 try {
                     $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
@@ -156,13 +157,13 @@ class PublicationController extends Controller
                 
         } catch (\Exception $e) {
             // Hapus file jika terlanjur tersimpan di storage
-            if (isset($pdfPath) && Storage::disk('public')->exists($pdfPath)) {
-                Storage::disk('public')->delete($pdfPath);
+            if (isset($pdfPath) && Storage::disk('publications')->exists($pdfPath)) {
+                Storage::disk('publications')->delete($pdfPath);
             }
 
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['pdf' => 'Terjadi kesalahan sistem saat memproses berkas: ' . $e->getMessage()]);
+                ->withErrors(['pdf' => 'Berkas belum dapat diproses. Silakan coba kembali.']);
         }
     }
 
@@ -173,8 +174,8 @@ class PublicationController extends Controller
     {
 
         // Menghapus berkas fisik PDF dari storage jika ada
-        if (Storage::disk('public')->exists($publication->pdf_path)) {
-            Storage::disk('public')->delete($publication->pdf_path);
+        if (Storage::disk('publications')->exists($publication->pdf_path)) {
+            Storage::disk('publications')->delete($publication->pdf_path);
         }
 
         // Simpan judul untuk notifikasi
@@ -209,7 +210,7 @@ class PublicationController extends Controller
 
         if (empty($text)) {
             // Jalankan ekstraksi secara manual dari file PDF
-            $absolutePath = storage_path('app/public/' . $publication->pdf_path);
+            $absolutePath = Storage::disk('publications')->path($publication->pdf_path);
             $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
             $text = $extracted['text'];
             $pages = $extracted['pages'];
@@ -299,7 +300,7 @@ class PublicationController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:Publikasi Umum,Statistik Sosial,Statistik Ekonomi,Statistik Pertanian,Statistik Industri,Statistik Distribusi,Statistik Lingkungan,Sensus & Survei',
             'release_date' => 'required|date',
-            'pdf' => 'nullable|file|mimes:pdf|max:25600', // Opsional, 25MB max
+            'pdf' => 'nullable|file|mimes:pdf|extensions:pdf|max:25600', // Opsional, 25MB max
         ], [
             'title.required' => 'Judul publikasi wajib diisi.',
             'category.required' => 'Kategori publikasi wajib diisi.',
@@ -324,17 +325,17 @@ class PublicationController extends Controller
         // Jika ada file PDF baru yang diunggah
         if ($request->hasFile('pdf')) {
             // Hapus file lama jika ada
-            if (Storage::disk('public')->exists($publication->pdf_path)) {
-                Storage::disk('public')->delete($publication->pdf_path);
+            if (Storage::disk('publications')->exists($publication->pdf_path)) {
+                Storage::disk('publications')->delete($publication->pdf_path);
             }
 
             // Simpan file baru
             $file = $request->file('pdf');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $data['pdf_path'] = $file->storeAs('publications', $filename, 'public');
+            $filename = (string) \Illuminate\Support\Str::uuid() . '.pdf';
+            $data['pdf_path'] = $file->storeAs('publications', $filename, 'publications');
 
             // Ekstraksi jumlah halaman dan ukuran file saat diupload
-            $absolutePath = storage_path('app/public/' . $data['pdf_path']);
+            $absolutePath = Storage::disk('publications')->path($data['pdf_path']);
             
             $fileBytes = @filesize($absolutePath) ?: 0;
             if ($fileBytes >= 1048576) {
@@ -345,8 +346,8 @@ class PublicationController extends Controller
                 $calculatedSize = $fileBytes . ' B';
             }
 
-            $fileSize = $request->input('file_size', $calculatedSize);
-            $pageCount = $request->input('page_count');
+            $fileSize = $calculatedSize;
+            $pageCount = null;
             if (empty($pageCount) || !is_numeric($pageCount)) {
                 try {
                     $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
@@ -408,6 +409,7 @@ class PublicationController extends Controller
      */
     public function activities(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'status' => 'nullable|string|max:32']);
 
         $query = \App\Models\Notification::query();
 
@@ -426,7 +428,7 @@ class PublicationController extends Controller
         }
 
         // Ambil notifikasi diurutkan dari yang terbaru (paginasi 15 item)
-        $activities = $query->latest()->paginate(15);
+        $activities = $query->latest()->paginate(15)->withQueryString();
 
         return view('activities.index', [
             'activities' => $activities,
@@ -454,14 +456,18 @@ class PublicationController extends Controller
         @set_time_limit(180);
 
         $request->validate([
-            'text' => 'required|string',
-            'pages' => 'required|array',
-            'page_count' => 'required|integer',
-            'file_size' => 'required|string'
+            'text' => 'required|string|max:2000000',
+            'pages' => 'required|array|max:2000',
+            'pages.*' => 'nullable|string|max:100000',
+            'page_count' => 'required|integer|min:1|max:2000',
+            'file_size' => 'required|string|max:32'
         ]);
 
         $text = $request->input('text');
         $pages = $request->input('pages');
+        if (array_sum(array_map(fn ($page) => strlen((string) $page), $pages)) > 2000000) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['pages' => 'Total teks halaman melebihi batas 2 MB.']);
+        }
         $pageCount = $request->input('page_count');
         $fileSize = $request->input('file_size');
 
@@ -513,6 +519,7 @@ class PublicationController extends Controller
         // Catat Notifikasi Aktivitas
         \App\Models\Notification::create([
             'title' => 'Ekstraksi AI Berhasil',
+            'type' => 'summary',
             'message' => 'Analisis AI untuk publikasi "' . $publication->title . '" berhasil diselesaikan secara otomatis.',
             'is_read' => false
         ]);
@@ -528,8 +535,25 @@ class PublicationController extends Controller
      */
     public function summaries(Request $request)
     {
-        $request->merge(['status' => 'Selesai']);
-        return $this->index($request);
+        $request->validate(['search' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'status' => 'nullable|string|max:32']);
+        $query = Publication::with('aiResult')->where('status', 'Selesai')->whereHas('aiResult');
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                    ->orWhereHas('aiResult', fn ($result) => $result->where('summary', 'like', '%' . $search . '%'));
+            });
+        }
+        if ($request->filled('category')) {
+            $query->where('category', $request->input('category'));
+        }
+        return view('admin.summaries.index', [
+            'activeMenu' => 'summaries',
+            'publications' => $query->latest()->paginate(12)->withQueryString(),
+            'summaryCount' => Publication::where('status', 'Selesai')->whereHas('aiResult')->count(),
+            'pendingCount' => Publication::where('status', '!=', 'Selesai')->count(),
+            'categories' => Publication::where('status', 'Selesai')->whereHas('aiResult')->distinct()->orderBy('category')->pluck('category'),
+        ]);
     }
 }
 

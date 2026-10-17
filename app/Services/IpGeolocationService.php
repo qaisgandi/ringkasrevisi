@@ -27,6 +27,11 @@ class IpGeolocationService
             return ['region' => 'Lokal', 'city' => 'Lokal'];
         }
 
+        // The legacy free endpoint sends visitor IPs over HTTP; opt in explicitly.
+        if (!config('services.geoip.enabled', false)) {
+            return ['region' => 'Tidak diketahui', 'city' => null];
+        }
+
         return Cache::remember('geoip:' . $ip, now()->addDays(30), function () use ($ip) {
             try {
                 $response = Http::timeout(4)->get("http://ip-api.com/json/{$ip}", [

@@ -8,7 +8,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex flex-col gap-1">
             <h1 class="heading-font text-2xl md:text-3xl font-extrabold text-[#0f2a4a] tracking-tight">Manajemen User</h1>
-            <p class="text-sm text-slate-500 font-medium">Kelola daftar akun administrator yang memiliki akses ke sistem</p>
+            <p class="text-sm text-slate-500 font-medium">Kelola akun pengguna dan administrator beserta peran aksesnya.</p>
         </div>
         <div>
             <a 

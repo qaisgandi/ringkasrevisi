@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Publications must be served through authenticated controller routes.
+    RewriteRule ^storage/publications(?:/|$) - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

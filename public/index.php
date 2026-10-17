@@ -5,6 +5,10 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Never disclose bootstrap errors before Laravel's exception handler is loaded.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;

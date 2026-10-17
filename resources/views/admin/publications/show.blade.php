@@ -3,8 +3,10 @@
 @section('title', 'Detail Publikasi - Sistem Ringkasan & Manajemen Publikasi Statistik BPS')
 
 @section('content')
+@vite('resources/js/pdf.js')
+<div class="rk-reading">
 <!-- Include Lucide Icons CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <div class="w-full space-y-8 fade-in">
 
@@ -127,7 +129,7 @@
                 <!-- Action Button Grid -->
                 <div class="flex flex-wrap gap-3">
                     <a 
-                        href="/storage/{{ $publication->pdf_path }}" 
+                        href="{{ route('publications.file', $publication) }}" 
                         target="_blank" 
                         class="inline-flex items-center gap-2 px-5 py-3 bg-bps-primary hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
@@ -136,7 +138,7 @@
                     </a>
                     
                     <a 
-                        href="/storage/{{ $publication->pdf_path }}" 
+                        href="{{ route('publications.file', $publication) }}" 
                         download="{{ basename($publication->pdf_path) }}"
                         class="inline-flex items-center gap-2 px-5 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-semibold transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
@@ -527,18 +529,16 @@
 </div>
 
 <!-- Initialize Lucide Icons & PDF.js Cover Rendering -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
 
         // PDF.js Document Loading (Single pass for thumbnail cover + text extraction)
-        const pdfUrl = '/storage/{{ $publication->pdf_path }}';
+        const pdfUrl = '{{ route('publications.file', $publication) }}';
         const canvas = document.getElementById('pdf-cover-canvas');
         const placeholder = document.getElementById('pdf-cover-placeholder');
 
         if (pdfUrl) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
             const loadingTask = pdfjsLib.getDocument(pdfUrl);
 
@@ -604,7 +604,7 @@
                                     }
 
                                     // Get human readable file size
-                                    const bytes = {{ file_exists(storage_path('app/public/' . $publication->pdf_path)) ? filesize(storage_path('app/public/' . $publication->pdf_path)) : 0 }};
+                                    const bytes = {{ file_exists(Storage::disk('publications')->path($publication->pdf_path)) ? filesize(Storage::disk('publications')->path($publication->pdf_path)) : 0 }};
                                     let fileSizeStr = bytes + ' B';
                                     if (bytes >= 1048576) {
                                         fileSizeStr = (bytes / 1048576).toFixed(2) + ' MB';
@@ -671,4 +671,5 @@
         return false;
     }
 </script>
+</div>
 @endsection

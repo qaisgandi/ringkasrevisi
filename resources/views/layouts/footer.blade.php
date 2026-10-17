@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <p class="text-xs text-slate-400 leading-relaxed font-medium">
-                    Portal digital bertenaga AI yang merangkum ribuan halaman publikasi statistik Badan Pusat Statistik menjadi informasi ringkas yang mudah dipahami demi mendukung literasi data nasional.
+                    RINGKAS membantu pembaca menelusuri publikasi statistik BPS melalui ringkasan terstruktur. Periksa kembali dokumen asli untuk memahami konteks dan rincian data.
                 </p>
                 <div class="space-y-4 pt-1">
                     <!-- BPS Link -->

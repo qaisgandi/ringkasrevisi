@@ -41,7 +41,7 @@
 
     <!-- Form Card -->
     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 md:p-8">
-        <form action="{{ route('users.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('users.store') }}" method="POST" data-submit-state class="space-y-6">
             @csrf
 
             <!-- Nama Lengkap -->
@@ -113,10 +113,10 @@
                         <input 
                             type="password" 
                             name="password" 
-                            id="password" 
+                             minlength="12" maxlength="128" autocomplete="new-password" id="password" 
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
-                            placeholder="Min. 6 karakter"
+                            placeholder="Min. 12 karakter"
                         >
                         <button 
                             type="button" 
@@ -187,34 +187,5 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleButtons = document.querySelectorAll('.toggle-password-btn');
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const targetId = this.getAttribute('data-target');
-                const passwordInput = document.getElementById(targetId);
-                if (!passwordInput) return;
 
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-
-                const eyeOpen = this.querySelector('.eye-open');
-                const eyeClosed = this.querySelector('.eye-closed');
-
-                if (type === 'password') {
-                    eyeOpen.classList.remove('hidden');
-                    eyeClosed.classList.add('hidden');
-                    this.setAttribute('title', 'Tampilkan Password');
-                } else {
-                    eyeOpen.classList.add('hidden');
-                    eyeClosed.classList.remove('hidden');
-                    this.setAttribute('title', 'Sembunyikan Password');
-                }
-            });
-        });
-    });
-</script>
 @endsection

@@ -26,7 +26,9 @@ class PdfExtractionService
 
         // Primary: Use Smalot PdfParser
         try {
-            $parser = new \Smalot\PdfParser\Parser();
+            $config = new \Smalot\PdfParser\Config();
+            $config->setDecodeMemoryLimit(16 * 1024 * 1024);
+            $parser = new \Smalot\PdfParser\Parser([], $config);
             $pdf = $parser->parseFile($filePath);
             $pages = [];
             $pageNum = 1;
@@ -181,7 +183,7 @@ class PdfExtractionService
             if (!empty($streamMatches[1])) {
                 foreach ($streamMatches[1] as $stream) {
                     $stream = trim($stream);
-                    $decompressed = @gzuncompress($stream);
+                    $decompressed = @gzuncompress($stream, 16 * 1024 * 1024);
                     if ($decompressed !== false) {
                         $fullText .= $this->parseBtEtBlocks($decompressed) . ' ';
                     }
@@ -214,7 +216,7 @@ class PdfExtractionService
 
             // Check if stream is compressed
             if (stripos($dict, '/FlateDecode') !== false) {
-                $decompressed = @gzuncompress($stream);
+                $decompressed = @gzuncompress($stream, 16 * 1024 * 1024);
                 if ($decompressed !== false) {
                     return $this->parseBtEtBlocks($decompressed);
                 }

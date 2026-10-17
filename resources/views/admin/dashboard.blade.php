@@ -3,6 +3,7 @@
 @section('title', 'Dashboard Admin - Sistem Ringkasan & Manajemen Publikasi Statistik BPS')
 
 @section('content')
+<div class="rk-page-heading"><div><p class="rk-kicker">Panel administrator</p><h1>{{ request('view') === 'statistics' ? 'Statistik Ringkasan' : 'Dashboard' }}</h1><p>{{ request('view') === 'statistics' ? 'Distribusi publikasi dan ringkasan dari data yang tersimpan. Tren ringkasan mengikuti waktu hasil AI pertama kali dibuat.' : 'Pantau koleksi publikasi, hasil pemrosesan, dan aktivitas pembaca.' }}</p></div><a href="{{ route('publications.create') }}" class="rk-btn">Unggah publikasi</a></div>
 <div class="space-y-8">
     
     <!-- SECTION 1: 4 STATS CARDS -->
@@ -24,7 +25,7 @@
         </a>
 
         <!-- Card 2: Total Ringkasan -->
-        <a href="{{ route('publications.index', ['status' => 'Selesai']) }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
+        <a href="{{ route('admin.summaries') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Ringkasan</p>
@@ -86,8 +87,13 @@
                 <span>Publikasi per Kategori</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
-                <canvas id="categoryChart"></canvas>
+                @if(array_sum($categoryData) > 0)
+                <canvas id="categoryChart" role="img" aria-label="Grafik data data kategori — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada data kategori" description="Distribusi akan tersedia setelah publikasi diunggah." />
+                @endif
             </div>
+            @if(array_sum($categoryData) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach($categoryData as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
 
         <!-- Right Box: Ringkasan per Bulan -->
@@ -100,8 +106,13 @@
                 <span>Ringkasan per Bulan</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
-                <canvas id="monthlyChart"></canvas>
+                @if(array_sum($monthlyData) > 0)
+                <canvas id="monthlyChart" role="img" aria-label="Grafik data ringkasan dalam periode ini — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada ringkasan dalam periode ini" description="Grafik menampilkan hasil AI yang dibuat selama enam bulan terakhir." />
+                @endif
             </div>
+            @if(array_sum($monthlyData) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach($monthlyData as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
     </div>
 
@@ -130,16 +141,26 @@
                 <span>Kunjungan 7 Hari Terakhir</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
-                <canvas id="visitsDailyChart"></canvas>
+                @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)
+                <canvas id="visitsDailyChart" role="img" aria-label="Grafik data kunjungan dalam tujuh hari terakhir — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada kunjungan dalam tujuh hari terakhir" description="Grafik muncul setelah aktivitas pembaca tercatat." />
+                @endif
             </div>
+            @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByDay'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
             <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50">
                 <span>Kunjungan per Wilayah (Top 8)</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
-                <canvas id="visitsRegionChart"></canvas>
+                @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)
+                <canvas id="visitsRegionChart" role="img" aria-label="Grafik data data wilayah — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada data wilayah" description="Distribusi wilayah akan tampil ketika data kunjungan tersedia." />
+                @endif
             </div>
+            @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByRegion'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
     </div>
 
@@ -267,7 +288,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="/storage/{{ $publication->pdf_path }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-bps-primary hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all" title="Lihat PDF">
+                                    <a href="{{ route('publications.file', $publication) }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-bps-primary hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all" title="Lihat PDF">
                                         <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -285,14 +306,15 @@
 </div>
 
 <!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('ringkas:charts-ready', function() {
         // Data dari Controller
         const categoryData = @json($categoryData);
         const monthlyData = @json($monthlyData);
 
         // 1. Chart Kategori (Doughnut Chart)
+        if (document.getElementById('categoryChart')) {
         const ctxCategory = document.getElementById('categoryChart').getContext('2d');
         const categories = Object.keys(categoryData);
         const categoryCounts = Object.values(categoryData);
@@ -305,7 +327,7 @@
             data: {
                 labels: categories,
                 datasets: [{
-                    data: isCategoryEmpty ? [1, 1, 1, 1, 1, 1, 1, 1] : categoryCounts,
+                    data: categoryCounts,
                     backgroundColor: [
                         '#0266b3', // BPS Blue
                         '#ff9e1b', // BPS Orange
@@ -330,7 +352,7 @@
                         labels: {
                             font: {
                                 size: 11,
-                                family: 'Inter',
+                                family: 'Arial, sans-serif',
                                 weight: '600'
                             },
                             color: '#1e293b',
@@ -352,7 +374,9 @@
             }
         });
 
+        }
         // 2. Chart Ringkasan Bulanan (Bar Chart)
+        if (document.getElementById('monthlyChart')) {
         const ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
         const months = Object.keys(monthlyData);
         const monthlyCounts = Object.values(monthlyData);
@@ -382,7 +406,7 @@
                             stepSize: 1,
                             font: {
                                 size: 10,
-                                family: 'Inter',
+                                family: 'Arial, sans-serif',
                                 weight: '600'
                             },
                             color: '#475569'
@@ -395,7 +419,7 @@
                         ticks: {
                             font: {
                                 size: 10,
-                                family: 'Inter',
+                                family: 'Arial, sans-serif',
                                 weight: '600'
                             },
                             color: '#475569'
@@ -412,11 +436,13 @@
                 }
             }
         });
+        }
         // Data monitoring kunjungan
         const visitsByDay = @json($visitStats['visitsByDay'] ?? []);
         const visitsByRegion = @json($visitStats['visitsByRegion'] ?? []);
 
         // 3. Chart Kunjungan Harian (Line)
+        if (document.getElementById('visitsDailyChart')) {
         const ctxVisits = document.getElementById('visitsDailyChart').getContext('2d');
         new Chart(ctxVisits, {
             type: 'line',
@@ -443,7 +469,9 @@
             }
         });
 
+        }
         // 4. Chart Kunjungan per Wilayah (Horizontal Bar)
+        if (document.getElementById('visitsRegionChart')) {
         const ctxRegion = document.getElementById('visitsRegionChart').getContext('2d');
         new Chart(ctxRegion, {
             type: 'bar',
@@ -467,6 +495,8 @@
                 plugins: { legend: { display: false } }
             }
         });
+        }
     });
 </script>
 @endsection
+

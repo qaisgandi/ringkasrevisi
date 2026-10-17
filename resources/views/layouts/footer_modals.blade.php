@@ -23,8 +23,8 @@
                     <i data-lucide="award" class="w-4 h-4 text-bps-lightBlue"></i> Nilai Utama Kami
                 </h4>
                 <ul class="list-disc pl-4 text-xs space-y-1.5 font-medium text-slate-600">
-                    <li><strong>Efisien</strong>: Menghemat waktu pembacaan publikasi dari berjam-jam menjadi hitungan menit.</li>
-                    <li><strong>Akurat</strong>: Menjaga substansi dan validitas indikator statistik resmi BPS.</li>
+                    <li><strong>Efisien</strong>: Membantu mengenali pokok pembahasan sebelum membaca dokumen secara menyeluruh.</li>
+                    <li><strong>Akurat</strong>: Mendorong pembaca memeriksa informasi kembali pada publikasi asli.</li>
                     <li><strong>Aksesibel</strong>: Memudahkan siapapun memahami statistik dasar sektoral maupun wilayah.</li>
                 </ul>
             </div>
@@ -106,7 +106,7 @@
                 </div>
                 <div class="border-t border-slate-100 pt-3">
                     <h4 class="font-bold text-bps-navy text-xs">Q: Bagaimana cara mendownload ringkasan?</h4>
-                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">A: Anda dapat melihat dan menyalin teks ringkasan langsung dari dasbor Anda. Fitur ekspor ke format PDF ringkas akan segera hadir pada pengembangan selanjutnya.</p>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">A: Anda dapat melihat dan menyalin teks ringkasan langsung dari dasbor Anda. Dokumen PDF sumber dapat diunduh dari halaman detail publikasi.</p>
                 </div>
                 <div class="border-t border-slate-100 pt-3">
                     <h4 class="font-bold text-bps-navy text-xs">Q: Apakah saya dapat mengajukan publikasi baru untuk diringkas?</h4>
@@ -172,12 +172,18 @@
 </div>
 
 <script>
+    let footerModalTrigger = null;
     // Handle modal opens
     function openFooterModal(modalId) {
         const modal = document.getElementById(modalId);
         const content = document.getElementById(modalId + '-content');
         if (modal) {
+            footerModalTrigger = document.activeElement;
             modal.classList.remove('hidden');
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.setAttribute('aria-label', modal.querySelector('h3')?.textContent || 'Informasi');
+            modal.querySelector('button')?.focus();
             modal.classList.add('flex');
             // Small timeout to allow transition to trigger
             setTimeout(() => {
@@ -205,6 +211,7 @@
                 modal.classList.remove('flex');
             }, 300);
             document.body.classList.remove('overflow-hidden');
+            footerModalTrigger?.focus();
         }
     }
 
@@ -213,6 +220,16 @@
         ['about-modal', 'guide-modal', 'faq-modal', 'contact-modal'].forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (modal) {
+                modal.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') closeFooterModal(modalId);
+                    if (e.key === 'Tab') {
+                        const focusable = [...modal.querySelectorAll('a[href], button, input, select, textarea')].filter(el => !el.disabled && el.getClientRects().length);
+                        const first = focusable[0], last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+                        if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+                    }
+                });
+                modal.querySelector('button')?.setAttribute('aria-label', 'Tutup dialog');
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) {
                         closeFooterModal(modalId);

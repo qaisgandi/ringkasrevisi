@@ -28,8 +28,8 @@ class UserAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
+            'username' => 'required|string|max:255',
+            'password' => 'required|string|max:1024',
         ], [
             'username.required' => 'Username wajib diisi.',
             'password.required' => 'Password wajib diisi.',
@@ -77,7 +77,7 @@ class UserAuthController extends Controller
         $request->validate([
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:12|max:128|confirmed',
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.unique' => 'Username sudah digunakan.',
@@ -85,7 +85,7 @@ class UserAuthController extends Controller
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan.',
             'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal terdiri dari 8 karakter.',
+            'password.min' => 'Password minimal terdiri dari 12 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
@@ -106,6 +106,7 @@ class UserAuthController extends Controller
         ]);
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         return redirect()->route('home')->with('success', 'Akun berhasil didaftarkan! Selamat datang di RINGKAS.');
     }
@@ -127,6 +128,7 @@ class UserAuthController extends Controller
      */
     public function beranda(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'status' => 'nullable|string|max:32']);
         // 8 Kategori Resmi Publikasi BPS yang sama dengan Admin
         $officialCategories = [
             'Publikasi Umum',
@@ -199,7 +201,8 @@ class UserAuthController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:12|max:128|confirmed',
+            'current_password' => 'required_with:password|string|max:1024|current_password',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'username.required' => 'Username wajib diisi.',
@@ -207,7 +210,7 @@ class UserAuthController extends Controller
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan oleh user lain.',
-            'password.min' => 'Password minimal terdiri dari 8 karakter.',
+            'password.min' => 'Password minimal terdiri dari 12 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
@@ -219,9 +222,14 @@ class UserAuthController extends Controller
 
         if ($request->filled('password')) {
             $userData['password'] = Hash::make($request->input('password'));
+            $userData['remember_token'] = \Illuminate\Support\Str::random(60);
         }
 
-        $user->update($userData);
+        $user->forceFill($userData)->save();
+        if ($request->filled('password')) {
+            $request->session()->regenerate();
+            $request->session()->put('password_hash_web', $user->password);
+        }
 
         return back()->with('success', 'Profil akun berhasil diperbarui.');
     }
@@ -260,12 +268,13 @@ class UserAuthController extends Controller
             // Tracking gagal tidak boleh menggagalkan download.
         }
 
-        if (empty($publication->pdf_path) || !\Illuminate\Support\Facades\Storage::disk('public')->exists($publication->pdf_path)) {
+        abort_unless(preg_match('/\Apublications\/[a-zA-Z0-9_.-]+\.pdf\z/i', (string) $publication->pdf_path), 404);
+        if (empty($publication->pdf_path) || !\Illuminate\Support\Facades\Storage::disk('publications')->exists($publication->pdf_path)) {
             return back()->with('error', 'Berkas PDF tidak ditemukan.');
         }
 
         $filename = \Illuminate\Support\Str::slug(substr($publication->title, 0, 60)) . '.pdf';
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->download($publication->pdf_path, $filename);
+        return \Illuminate\Support\Facades\Storage::disk('publications')->download($publication->pdf_path, $filename);
     }
 }

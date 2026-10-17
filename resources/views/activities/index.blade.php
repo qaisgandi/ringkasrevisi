@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Include Lucide CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <div class="space-y-8 fade-in">
     
@@ -98,12 +98,12 @@
                 <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mb-4 border border-slate-100">
                     <i data-lucide="info" class="w-8 h-8"></i>
                 </div>
-                <h3 class="heading-font text-base font-bold text-slate-700">Belum Ada Aktivitas</h3>
+                <h3 class="heading-font text-base font-bold text-slate-700">{{ request('search') || (request('type') && request('type') !== 'all') ? 'Tidak ada aktivitas yang sesuai' : 'Belum Ada Aktivitas' }}</h3>
                 <p class="text-sm text-slate-400 mt-1 max-w-sm">
                     @if (request('search') || request('type'))
                         Pencarian Anda tidak menemukan log aktivitas yang cocok.
                     @else
-                        Belum ada aktivitas yang dicatat oleh sistem saat ini.
+                        {{ request('search') || (request('type') && request('type') !== 'all') ? 'Coba kata pencarian lain atau hapus filter.' : 'Riwayat unggahan, pembaruan, dan pemrosesan akan muncul setelah ada aktivitas.' }}
                     @endif
                 </p>
             </div>

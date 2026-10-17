@@ -24,7 +24,8 @@ class ChatbotController extends Controller
         $request->validate([
             'message' => 'required|string|max:3000',
             'publication_id' => 'nullable|integer|exists:publications,id',
-            'history' => 'nullable|array',
+            'history' => 'nullable|array|max:20',
+            'history.*' => 'array:role,text,content',
             'history.*.role' => 'nullable|string|in:user,model,assistant',
             'history.*.text' => 'nullable|string|max:4000',
             'history.*.content' => 'nullable|string|max:4000',
@@ -49,6 +50,7 @@ class ChatbotController extends Controller
      */
     public function getSuggestions(Request $request)
     {
+        $request->validate(['publication_id' => 'nullable|integer|exists:publications,id']);
         $publicationId = $request->input('publication_id');
         
         if ($publicationId) {

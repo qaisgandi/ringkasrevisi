@@ -14,6 +14,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:255', 'category' => 'nullable|string|max:100', 'status' => 'nullable|string|max:32']);
 
         $query = User::query();
 
@@ -56,7 +57,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:12|max:128|confirmed',
             'role' => 'required|string|in:admin,user',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -66,7 +67,7 @@ class UserController extends Controller
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
             'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 6 karakter.',
+            'password.min' => 'Password minimal 12 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'role.required' => 'Role wajib dipilih.',
             'role.in' => 'Role tidak valid.',
@@ -113,7 +114,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:6|confirmed',
+            'password' => 'nullable|string|min:12|max:128|confirmed',
             'role' => 'required|string|in:admin,user',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
@@ -122,12 +123,19 @@ class UserController extends Controller
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
-            'password.min' => 'Password minimal 6 karakter.',
+            'password.min' => 'Password minimal 12 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'role.required' => 'Role wajib dipilih.',
             'role.in' => 'Role tidak valid.',
         ]);
 
+        if ($user->id === $request->user()->id && $request->role !== 'admin') {
+            return back()->withErrors(['role' => 'Anda tidak dapat menurunkan peran akun admin sendiri.']);
+        }
+        if ($user->id === $request->user()->id && $request->filled('password')) {
+            $request->validate(['current_password' => 'required|string|max:1024|current_password']);
+            $request->session()->regenerate();
+        }
         $oldUsername = $user->username;
 
         $updateData = [
@@ -139,6 +147,7 @@ class UserController extends Controller
 
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
+            $user->setRememberToken(\Illuminate\Support\Str::random(60));
         }
 
         $user->update($updateData);

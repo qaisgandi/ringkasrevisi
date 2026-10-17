@@ -48,7 +48,7 @@ class AiSummarizerService
             try {
                 return $this->summarizeWithGemini($title, $category, $year, $fullText, $pagesArray, $pageCount, $fileSize, $uploadDate);
             } catch (\Exception $e) {
-                Log::warning('Gemini API summarization failed: ' . $e->getMessage() . '. Falling back to local summarizer.');
+                Log::warning('Gemini summarization failed; using local fallback.', ['exception_type' => get_class($e)]);
             }
         }
 
@@ -121,9 +121,10 @@ Kembalikan respon hanya berupa JSON dengan struktur persis seperti berikut (jang
   \"conclusion\": \"Satu paragraf kesimpulan eksekutif akhir yang kuat mengenai implikasi data ini terhadap pembangunan atau perencanaan daerah.\"
 }";
 
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
-        $response = Http::withoutVerifying()->withHeaders([
+        $response = Http::withHeaders([
+            'x-goog-api-key' => $apiKey,
             'Content-Type' => 'application/json',
         ])->timeout(45)->post($endpoint, [
             'contents' => [

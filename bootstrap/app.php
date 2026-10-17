@@ -21,19 +21,19 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     ])
     ->withMiddleware(function (Middleware $middleware): void {
-        // Percayai header X-Forwarded-For dari proxy (ngrok saat dev,
-        // CDN/load-balancer saat produksi) agar $request->ip()
-        // mengembalikan IP publik pengunjung asli, bukan IP proxy lokal.
-        // Produksi: ganti '*' dengan daftar IP/CIDR proxy resmi.
-        $middleware->trustProxies(at: '*');
+        // Exact proxy addresses are loaded from config/security.php by AppServiceProvider.
+        $middleware->trustProxies(at: []);
+        $middleware->prepend(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->web(append: [\Illuminate\Session\Middleware\AuthenticateSession::class]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'track.visit' => \App\Http\Middleware\TrackVisit::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['current_password', 'old_password', 'password', 'password_confirmation']);
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
         $exceptions->render(function (
@@ -41,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             Request $request
         ) {
             return redirect()->back()
-                ->withInput()
+                ->withInput($request->except(['password', 'password_confirmation', 'current_password', 'old_password']))
                 ->withErrors([
                     'pdf' => 'Ukuran berkas terlalu besar untuk diunggah. Batas maksimal server saat ini adalah '
                         . ini_get('post_max_size')

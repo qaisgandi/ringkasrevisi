@@ -11,7 +11,7 @@
      class="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans select-none print:hidden">
 
     <!-- FLOATING CHAT PANEL (HIDDEN BY DEFAULT) -->
-    <div id="chatbotWindow" 
+    <div id="chatbotWindow" role="region" aria-label="Asisten tanya jawab RINGKAS" 
          style="height:min(520px,calc(100dvh - 11rem));max-height:calc(100dvh - 11rem);width:380px;max-width:calc(100vw - 3rem);"
          class="hidden flex-col w-[380px] max-w-[calc(100vw-3rem)] h-[min(520px,calc(100dvh-11rem))] max-h-[calc(100dvh-11rem)] bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden transition-all duration-300 transform scale-95 opacity-0 origin-bottom-right mb-3">
         
@@ -81,7 +81,7 @@
         </div>
 
         <!-- CHAT MESSAGES CONTAINER -->
-        <div id="chatbotMessages" style="flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;touch-action:pan-y;" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 bg-slate-50/50 scroll-smooth">
+        <div id="chatbotMessages" role="log" aria-live="polite" aria-relevant="additions" style="flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;touch-action:pan-y;" class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-4 bg-slate-50/50 scroll-smooth">
             
             <!-- Bot Greeting Message -->
             <div class="flex items-start gap-2.5 message-bot animate-fadeIn">
@@ -91,7 +91,7 @@
                 <div class="w-full max-w-[85%] min-w-0 space-y-1">
                     <div class="w-full min-w-0 break-words bg-white border border-slate-200/90 rounded-2xl rounded-tl-sm px-4 py-3.5 text-xs text-slate-800 leading-[1.7] shadow-sm chatbot-prose">
                         <p class="font-semibold text-bps-navy mb-1.5 flex items-center gap-1.5">
-                            <span>Halo! Saya Asisten Pintar BPS 👋</span>
+                            <span>Halo! Saya Asisten BPS</span>
                         </p>
                         @if($hasCurrentPublication)
                             <p>Saya siap membantu Anda membedah dan menjawab pertanyaan seputar isi buku <strong>"{{ $currentPublication->title }}"</strong>.</p>
@@ -112,23 +112,23 @@
                 <div class="flex flex-wrap gap-1.5" id="quickChipsList">
                     @if($hasCurrentPublication)
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            📊 Apa kesimpulan utama dokumen ini?
+                            Apa kesimpulan utama dokumen ini?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
                             📈 Apa saja indikator statistik penting di buku ini?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            🔍 Jelaskan tren data yang ditemukan
+                            Jelaskan tren data yang ditemukan
                         </button>
                     @else
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            📍 Ada di publikasi mana data tingkat IPM terbaru?
+                            Ada di publikasi mana data tingkat IPM terbaru?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            📉 Di mana saya bisa melihat data kemiskinan & inflasi?
+                            Di mana saya bisa melihat data kemiskinan & inflasi?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            📚 Publikasi apa saja yang tersedia untuk tahun 2024?
+                            Publikasi apa saja yang tersedia untuk tahun 2024?
                         </button>
                     @endif
                 </div>
@@ -153,7 +153,7 @@
             <form id="chatbotForm" class="flex items-end gap-2">
                 <div class="relative flex-1 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                     <textarea 
-                        id="chatbotInput" 
+                        id="chatbotInput" aria-label="Pertanyaan tentang publikasi" 
                         rows="1"
                         placeholder="Tanya data statistik, letak publikasi, atau isi buku..." 
                         class="w-full bg-transparent px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none resize-none max-h-24 leading-relaxed"></textarea>
@@ -176,24 +176,17 @@
 
     <!-- FLOATING ACTION BUTTON (TOGGLE) -->
     <button type="button" 
-            id="btnToggleChatbot" 
+            id="btnToggleChatbot" aria-controls="chatbotWindow" aria-expanded="false" 
             aria-label="Buka Chatbot AI BPS"
-            class="group relative flex items-center gap-2.5 px-4 py-3.5 bg-gradient-to-r from-bps-navy via-slate-900 to-bps-lightBlue text-white rounded-full shadow-xl shadow-blue-900/30 hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-1 transition-all duration-300 border border-white/20 cursor-pointer">
+            class="group relative flex items-center gap-2.5 px-4 py-3.5 bg-bps-navy text-white rounded-lg shadow-md border border-white/20 cursor-pointer">
         
-        <!-- Ripple Glow Ring -->
-        <span class="absolute -inset-1 rounded-full bg-blue-500/30 blur-sm group-hover:bg-cyan-400/40 transition-all animate-pulse pointer-events-none"></span>
-
-        <!-- AI Sparkle Icon -->
-        <div class="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
-            <i data-lucide="sparkles" class="w-4 h-4 text-cyan-300 group-hover:rotate-12 transition-transform duration-300"></i>
-            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-slate-900"></span>
-        </div>
+        <i data-lucide="message-circle" class="w-5 h-5 text-white" aria-hidden="true"></i>
 
         <div class="flex flex-col items-start pr-1">
             <span class="text-xs font-extrabold tracking-tight leading-none text-white flex items-center gap-1">
                 Tanya BPS AI
             </span>
-            <span class="text-[9px] text-cyan-200/90 font-semibold tracking-wider uppercase mt-0.5">
+            <span class="text-[11px] text-slate-200 font-semibold tracking-wider uppercase mt-0.5">
                 {{ $hasCurrentPublication ? 'Mode Dokumen' : 'Katalog Universal' }}
             </span>
         </div>
@@ -424,6 +417,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle Chat Window
     function openChat() {
+        btnToggle.classList.add('hidden');
+        btnToggle.setAttribute('aria-expanded', 'true');
         chatWindow.classList.remove('hidden');
         chatWindow.classList.add('flex');
         setTimeout(() => {
@@ -436,6 +431,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function closeChat() {
+        btnToggle.classList.remove('hidden');
+        btnToggle.setAttribute('aria-expanded', 'false');
+        btnToggle.focus();
         chatWindow.classList.remove('scale-100', 'opacity-100');
         chatWindow.classList.add('scale-95', 'opacity-0');
         if (fabArrow) fabArrow.classList.remove('rotate-180');
@@ -454,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     btnClose.addEventListener('click', closeChat);
+    chatWindow.addEventListener('keydown', e => { if (e.key === 'Escape') closeChat(); });
 
     // Switch to Universal Mode if user explicitly clicks 'Cari Global'
     if (btnSwitchUniversal) {
@@ -462,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
             contextText.innerHTML = 'Mode Asisten Universal: Menjelajahi seluruh katalog publikasi BPS';
             modeBadge.innerHTML = '<i data-lucide="globe" class="w-3 h-3 text-cyan-300"></i><span>Asisten Universal BPS</span>';
             btnSwitchUniversal.classList.add('hidden');
-            if (window.lucide) lucide.createIcons();
+            if (window.lucide) if (window.lucide) window.lucide.createIcons();
             appendBotMessage("Beralih ke **Mode Universal BPS**. Sekarang Anda dapat menanyakan letak data atau publikasi apa pun dari seluruh katalog!");
         });
     }
@@ -521,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="text-[10px] text-slate-400 font-medium pr-1">${timeStr}</span>
             </div>
             <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200 font-bold text-xs">
-                ${'{{ substr(Auth::user()->username ?? "U", 0, 2) }}'}
+                ${escapeHtml({{ \Illuminate\Support\Js::from(mb_substr(Auth::user()->username ?? 'U', 0, 2)) }})}
             </div>
         `;
         messagesContainer.insertBefore(div, typingIndicator);
@@ -531,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Append Bot Message
     function appendBotMessage(markdownText) {
         const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        const htmlContent = parseMarkdown(markdownText);
+        const htmlContent = window.DOMPurify.sanitize(parseMarkdown(markdownText), {USE_PROFILES: {html: true}});
         const div = document.createElement('div');
         div.className = 'flex items-start gap-2.5 message-bot animate-fadeIn';
         div.innerHTML = `
@@ -546,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         messagesContainer.insertBefore(div, typingIndicator);
-        if (window.lucide) lucide.createIcons();
+        if (window.lucide) if (window.lucide) window.lucide.createIcons();
         scrollToBottom();
     }
 
@@ -587,7 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     message: message,
                     publication_id: currentPublicationId,
-                    history: chatHistory
+                    history: chatHistory.slice(-20).map(item => ({role: item.role, text: item.text.slice(0, 4000)}))
                 })
             });
 
@@ -600,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatHistory.push({ role: 'model', text: data.reply });
                 appendBotMessage(data.reply);
             } else {
-                appendBotMessage('Maaf, terjadi kesalahan saat menghubungi server AI. Silakan coba beberapa saat lagi.');
+                appendBotMessage(response.status === 429 ? 'Batas permintaan tercapai. Silakan tunggu sebelum mencoba lagi.' : 'Maaf, terjadi kesalahan saat menghubungi server AI. Silakan coba beberapa saat lagi.');
             }
         } catch (error) {
             console.error('Chatbot request error:', error);
@@ -777,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize Lucide icons
     if (window.lucide) {
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
     }
 });
 </script>
