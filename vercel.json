@@ -8,6 +8,14 @@
     },
     "routes": [
         {
+        "src": "/build/(.*)",
+        "dest": "/public/build/$1"
+        },
+            {
+        "src": "/images/(.*)",
+        "dest": "/public/images/$1"
+         },
+        {
             "src": "/(.*)",
             "dest": "/api/index.php"
         }
@@ -15,7 +23,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://aplikasi-ringkasan.vercel.app",
+        "APP_URL": "https://ringkas-public.vercel.app",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
