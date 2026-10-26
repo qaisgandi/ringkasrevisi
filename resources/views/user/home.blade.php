@@ -23,17 +23,35 @@
 @section('content')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
-    <section class="rk-catalog-hero"><div class="rk-wrap">
-        <p class="rk-kicker rk-area-kicker"><i data-lucide="library" aria-hidden="true"></i>Katalog publikasi BPS</p><h1>Apa yang ingin Anda pahami?</h1>
-        <p>Temukan publikasi, pelajari ringkasannya, dan telusuri informasi dalam dokumen sumber.</p>
-        <form action="{{ route('home') }}#publikasi-terbaru" method="GET" class="rk-search" role="search">
-            @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
-            <label for="catalog-search" class="sr-only">Cari judul, kategori, tahun, atau wilayah</label>
-            <input id="catalog-search" class="rk-input" name="search" value="{{ request('search') }}" placeholder="Cari judul, kategori, tahun, atau wilayah">
-            <button type="submit" class="rk-btn"><i data-lucide="search" aria-hidden="true"></i>Cari</button>
-        </form>
-        <div class="rk-catalog-glance" aria-label="Ringkasan katalog"><span><i data-lucide="library" aria-hidden="true"></i><strong>{{ $totalAllPublications }}</strong><small>publikasi tersedia</small></span><span><i data-lucide="folders" aria-hidden="true"></i><strong>{{ count($officialCategories) }}</strong><small>kategori</small></span><span><i data-lucide="file-search-2" aria-hidden="true"></i><small>Cari menurut judul, tahun, atau wilayah</small></span></div>
-    </div></section>
+    <section class="rk-catalog-hero">
+        <div class="rk-wrap rk-catalog-hero-layout">
+            <div class="rk-catalog-copy">
+                <p class="rk-kicker rk-area-kicker"><i data-lucide="library" aria-hidden="true"></i>Katalog publikasi BPS</p>
+                <h1>Apa yang ingin Anda pahami?</h1>
+                <p>Temukan publikasi, pelajari ringkasannya, dan telusuri informasi dalam dokumen sumber.</p>
+                <form action="{{ route('home') }}#publikasi-terbaru" method="GET" class="rk-search" role="search">
+                    @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
+                    <label for="catalog-search" class="sr-only">Cari judul, kategori, tahun, atau wilayah</label>
+                    <input id="catalog-search" class="rk-input" name="search" value="{{ request('search') }}" placeholder="Cari judul, kategori, tahun, atau wilayah">
+                    <button type="submit" class="rk-btn"><i data-lucide="search" aria-hidden="true"></i>Cari</button>
+                </form>
+                <div class="rk-catalog-glance" aria-label="Ringkasan katalog"><span><i data-lucide="library" aria-hidden="true"></i><strong>{{ $totalAllPublications }}</strong><small>publikasi tersedia</small></span><span><i data-lucide="folders" aria-hidden="true"></i><strong>{{ count($officialCategories) }}</strong><small>kategori</small></span><span><i data-lucide="file-check-2" aria-hidden="true"></i><small>Sumber PDF tersedia</small></span></div>
+            </div>
+            <div class="rk-catalog-visual" aria-hidden="true">
+                <div class="rk-catalog-orbit rk-catalog-orbit-one"></div><div class="rk-catalog-orbit rk-catalog-orbit-two"></div>
+                <div class="rk-catalog-preview-card">
+                    <div class="rk-catalog-preview-head"><span><i></i><i></i><i></i></span><small>RUANG BACA / RINGKAS</small><i data-lucide="ellipsis" class="rk-catalog-preview-menu"></i></div>
+                    <div class="rk-catalog-preview-main">
+                        <div class="rk-catalog-cover"><span>RINGKAS</span><i data-lucide="chart-no-axes-combined"></i><b>DATA<br>STATISTIK</b><small>PUBLIKASI BPS</small><div class="rk-catalog-cover-bars"><i></i><i></i><i></i><i></i></div></div>
+                        <div class="rk-catalog-preview-copy"><small>RUANG BACA DIGITAL</small><strong>Publikasi dalam<br>genggaman Anda.</strong><span>Ringkasan terstruktur, dokumen sumber, dan konteks dalam satu tempat.</span><div class="rk-catalog-preview-tag"><i data-lucide="sparkles"></i>Ringkas & telusuri</div></div>
+                    </div>
+                    <div class="rk-catalog-preview-foot"><span><i data-lucide="file-text"></i>Publikasi</span><span><i data-lucide="align-left"></i>Ringkasan</span><span><i data-lucide="messages-square"></i>Tanya AI</span></div>
+                </div>
+                <div class="rk-catalog-float rk-catalog-float-top"><i data-lucide="book-open-check"></i><span>Dokumen sumber<br><strong>siap ditelusuri</strong></span></div>
+                <div class="rk-catalog-float rk-catalog-float-bottom"><span class="rk-catalog-float-mark"><i data-lucide="folders"></i></span><span><strong>{{ count($officialCategories) }} kategori</strong><small>Jelajahi sesuai topik</small></span></div>
+            </div>
+        </div>
+    </section>
 
     <!-- CONTENT WRAPPER -->
     <div class="rk-catalog-body rk-wrap space-y-8">
