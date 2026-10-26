@@ -17,6 +17,9 @@ return [
 
     'default' => env('CACHE_STORE', 'database'),
 
+    // Vercel login throttles need a fallback if its database cache table is unavailable.
+    'limiter' => env('VERCEL') ? 'failover' : env('CACHE_LIMITER'),
+
     /*
     |--------------------------------------------------------------------------
     | Cache Stores

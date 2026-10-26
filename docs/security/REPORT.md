@@ -64,7 +64,7 @@ Mode default hanya memeriksa. `--apply` menyalin ke disk privat, memverifikasi S
 ## Konfigurasi saat deployment
 
 1. Gunakan HTTPS dan `APP_ENV=production`, `APP_DEBUG=false`, serta APP_URL yang tepat. Cookie Secure aktif pada produksi. Jangan gunakan HTTP biasa untuk sesi produksi.
-2. Pastikan tabel `cache` dari migrasi Laravel tersedia di database produksi agar rate limit login tetap konsisten di semua instance. Vercel memakai cache database terlebih dahulu dan beralih ke `array` jika database cache tidak tersedia; fallback ini mencegah error login, tetapi pembatasan tidak lagi dibagi antar-instance sampai cache bersama pulih.
+2. Pastikan tabel `cache` dari migrasi Laravel tersedia di database produksi agar rate limit login tetap konsisten di semua instance. Di Vercel, limiter memakai cache database terlebih dahulu dan beralih ke `array` jika database cache tidak tersedia, sekalipun `CACHE_STORE` ditimpa di pengaturan proyek; fallback ini mencegah error limiter, tetapi pembatasan tidak lagi dibagi antar-instance sampai cache bersama pulih.
 3. Isi `TRUSTED_PROXIES` dengan IP/CIDR proxy yang benar. Jangan menggunakan `*` pada server yang dapat diakses langsung dari internet.
 4. Jalankan migrasi file lama di lingkungan tujuan. Untuk Nginx/CDN tambahkan aturan penolakan `/storage/publications/` dan hapus cache salinan publik lama; aturan `.htaccess` hanya berlaku untuk Apache.
 5. Lakukan build sebelum menjalankan versi baru karena manifest sekarang mencakup `resources/js/pdf.js`.
