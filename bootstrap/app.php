@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        \App\Console\Commands\CreateAdminUser::class,
+    ])
     ->withBindings([
         BladeCompiler::class => function ($app) {
             return new BladeCompiler(
