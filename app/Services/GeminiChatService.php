@@ -382,8 +382,11 @@ PANDUAN MENJAWAB:
                 foreach ($terms as $term) {
                     $query->orWhere('title', 'like', "%{$term}%")
                         ->orWhere('category', 'like', "%{$term}%")
-                        ->orWhere('region', 'like', "%{$term}%")
-                        ->orWhere('year', 'like', "%{$term}%");
+                        ->orWhere('region', 'like', "%{$term}%");
+
+                    if (preg_match('/\A\d{4}\z/', $term)) {
+                        $query->orWhere('year', (int) $term);
+                    }
                 }
             })
             ->latest()
