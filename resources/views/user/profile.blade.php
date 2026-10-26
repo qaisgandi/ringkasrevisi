@@ -6,7 +6,7 @@
     <div class="max-w-4xl w-full mx-auto px-4 py-12 space-y-8">
         <div>
             <h2 class="heading-font text-2xl md:text-3xl font-black text-bps-navy tracking-tight">Pengaturan Profil</h2>
-            <p class="text-xs md:text-sm text-slate-400 font-semibold mt-1">Ubah data profil pribadi Anda atau perbarui kata sandi akun Anda di sini.</p>
+            <p class="text-xs md:text-sm text-slate-400 font-semibold mt-1">Kelola identitas akun dan password Anda. Password baru menggunakan minimal 8 karakter.</p>
         </div>
 
         <!-- Alert Notifications -->
@@ -40,7 +40,7 @@
                     </svg>
                     Data Akun
                 </h3>
-                <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
+                <form action="{{ route('profile.update') }}" method="POST" class="space-y-4" data-submit-state>
                     @csrf
                     <div>
                         <label for="name" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
@@ -68,7 +68,7 @@
                     </svg>
                     Ubah Password
                 </h3>
-                <form action="{{ route('profile.update') }}" method="POST" class="space-y-4">
+                <form action="{{ route('profile.update') }}" method="POST" class="space-y-4" data-submit-state>
                     @csrf
                     <!-- Hidden elements so we can reuse updateProfile logic safely -->
                     <input type="hidden" name="name" value="{{ $user->name }}">
@@ -76,14 +76,19 @@
                     <input type="hidden" name="email" value="{{ $user->email }}">
 
                     <div>
+                        <label for="current_password" class="block text-sm font-semibold mb-2">Password saat ini</label>
+                        <input type="password" name="current_password" id="current_password" autocomplete="current-password" required maxlength="1024" class="rk-input">
+                        @error('current_password')<p class="rk-field-error">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
                         <label for="password" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Password Baru</label>
-                        <input type="password" name="password" id="password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-bps-lightBlue focus:ring-4 focus:ring-blue-100/50 transition-all">
+                        <div class="rk-password"><input type="password" minlength="8" maxlength="128" autocomplete="new-password" name="password" id="password" required placeholder="Minimal 8 karakter" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-bps-lightBlue focus:ring-4 focus:ring-blue-100/50 transition-all"><button type="button" class="toggle-password-btn" data-target="password" aria-pressed="false" aria-label="Tampilkan password">Tampilkan</button></div>
                     </div>
                     <div>
                         <label for="password_confirmation" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Konfirmasi Password Baru</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required placeholder="Ulangi password baru" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-bps-lightBlue focus:ring-4 focus:ring-blue-100/50 transition-all">
+                        <div class="rk-password"><input type="password" minlength="8" maxlength="128" autocomplete="new-password" name="password_confirmation" id="password_confirmation" required placeholder="Ulangi password baru" class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-bps-lightBlue focus:ring-4 focus:ring-blue-100/50 transition-all"><button type="button" class="toggle-password-btn" data-target="password_confirmation" aria-pressed="false" aria-label="Tampilkan password">Tampilkan</button></div>
                     </div>
-                    <button type="submit" class="w-full py-3 bg-bps-orange hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all">
+                    <button type="submit" class="w-full py-3 bg-bps-navy hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all">
                         Perbarui Password
                     </button>
                 </form>

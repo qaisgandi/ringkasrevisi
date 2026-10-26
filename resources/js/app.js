@@ -1,6 +1,65 @@
 // Consolidated script for BPS Ringkasan application
 document.addEventListener('DOMContentLoaded', function() {
-    
+    document.querySelectorAll('[data-publication-upload]').forEach(form => {
+        const input = form.querySelector('input[type="file"][name="pdf"]');
+        const zone = form.querySelector('[data-drop-zone]');
+        const feedback = form.querySelector('#file-feedback');
+        const error = form.querySelector('[data-file-error]');
+        if (!input) return;
+
+        const validateFile = file => {
+            if (!file) return '';
+            if (!/\.pdf$/i.test(file.name) || (file.type && file.type !== 'application/pdf')) {
+                return 'Pilih dokumen berformat PDF.';
+            }
+            if (file.size > 25 * 1024 * 1024) return 'Ukuran PDF maksimal 25 MB.';
+            return '';
+        };
+
+        input.addEventListener('change', () => {
+            const file = input.files?.[0];
+            const message = validateFile(file);
+            input.setCustomValidity(message);
+            if (error) {
+                error.textContent = message;
+                error.hidden = !message;
+            }
+            if (feedback) feedback.textContent = message || (file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Belum ada berkas dipilih.');
+        });
+
+        if (zone) {
+            zone.addEventListener('dragover', event => {
+                event.preventDefault();
+                zone.classList.add('is-dragging');
+            });
+            ['dragleave', 'drop'].forEach(type => zone.addEventListener(type, event => {
+                event.preventDefault();
+                zone.classList.remove('is-dragging');
+            }));
+            zone.addEventListener('drop', event => {
+                const file = event.dataTransfer?.files?.[0];
+                if (!file) return;
+                const transfer = new DataTransfer();
+                transfer.items.add(file);
+                input.files = transfer.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
+
+        form.addEventListener('submit', event => {
+            const message = validateFile(input.files?.[0]);
+            input.setCustomValidity(message);
+            if (message) {
+                event.preventDefault();
+                input.reportValidity();
+                return;
+            }
+            const progress = form.querySelector('[data-upload-progress]');
+            if (progress) progress.hidden = false;
+        });
+    });
+
+
     // ==========================================
     // 1. PASSWORD VISIBILITY TOGGLE (GLOBAL)
     // ==========================================
@@ -10,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Check if we use data-target attribute, otherwise default to "password"
             const targetId = this.getAttribute('data-target') || 'password';
             const passwordInput = document.getElementById(targetId);
@@ -19,6 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             const type = isPassword ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
+            this.setAttribute('aria-pressed', String(isPassword));
+            this.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+            if (!this.querySelector('svg, i')) this.textContent = isPassword ? 'Sembunyikan' : 'Tampilkan';
 
             // Locate the eye icons: either inside class list or by ID
             const eyeOpen = this.querySelector('.eye-open') || document.getElementById('eye-icon-open');
@@ -100,4 +162,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+
+    document.querySelectorAll('form[data-submit-state]').forEach(form => {
+        form.addEventListener('submit', event => {
+            if (event.defaultPrevented || !form.checkValidity()) return;
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+            button.dataset.originalLabel = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Memproses…';
+            form.setAttribute('aria-busy', 'true');
+        });
+    });
+
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('button[data-original-label]').forEach(button => {
+            button.textContent = button.dataset.originalLabel;
+            button.disabled = false;
+            button.closest('form')?.removeAttribute('aria-busy');
+        });
+    });
 });

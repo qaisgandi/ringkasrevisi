@@ -1,0 +1,3 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>@yield('title') — RINGKAS</title>@vite(['resources/css/app.css', 'resources/js/app.js'])</head>
+<body class="rk-auth"><aside class="rk-auth-aside"><div><x-brand /></div><div><h2>Informasi statistik.<br>Perspektif yang<br>lebih utuh.</h2><p>Temukan publikasi, baca ringkasan, dan pahami konteks data melalui RINGKAS.</p></div><small>Sistem Ringkasan Publikasi Statistik BPS</small></aside>
+<main class="rk-auth-main"><div class="rk-auth-form"><a href="{{ route('landing') }}" class="rk-auth-back">← Kembali ke beranda</a><h1>@yield('title')</h1><p>@yield('description')</p><x-alerts />@yield('content')</div></main></body></html>

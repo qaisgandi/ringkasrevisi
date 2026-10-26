@@ -6,8 +6,8 @@
 <div class="space-y-8">
     <!-- Header Page & Back Button -->
     <div class="flex items-center gap-4">
-        <a 
-            href="{{ route('users.index') }}" 
+        <a
+            href="{{ route('users.index') }}"
             class="p-2.5 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/60 rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0 cursor-pointer"
             title="Kembali ke Daftar User"
         >
@@ -41,16 +41,16 @@
 
     <!-- Form Card -->
     <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 md:p-8">
-        <form action="{{ route('users.store') }}" method="POST" class="space-y-6">
+        <form action="{{ route('users.store') }}" method="POST" data-submit-state class="space-y-6">
             @csrf
 
             <!-- Nama Lengkap -->
             <div class="space-y-1.5">
                 <label for="name" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Nama Lengkap</label>
-                <input 
-                    type="text" 
-                    name="name" 
-                    id="name" 
+                <input
+                    type="text"
+                    name="name"
+                    id="name"
                     value="{{ old('name') }}"
                     required
                     class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -61,9 +61,9 @@
             <!-- Role / Peran -->
             <div class="space-y-1.5">
                 <label for="role" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Role / Hak Akses</label>
-                <select 
-                    name="role" 
-                    id="role" 
+                <select
+                    name="role"
+                    id="role"
                     required
                     class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                 >
@@ -78,10 +78,10 @@
                     <label for="username" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Username</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-semibold select-none">@</span>
-                        <input 
-                            type="text" 
-                            name="username" 
-                            id="username" 
+                        <input
+                            type="text"
+                            name="username"
+                            id="username"
                             value="{{ old('username') }}"
                             required
                             class="w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -93,10 +93,10 @@
                 <!-- Email -->
                 <div class="space-y-1.5">
                     <label for="email" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Alamat Email</label>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        id="email" 
+                    <input
+                        type="email"
+                        name="email"
+                        id="email"
                         value="{{ old('email') }}"
                         required
                         class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -110,16 +110,16 @@
                 <div class="space-y-1.5">
                     <label for="password" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Password</label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            name="password" 
-                            id="password" 
+                        <input
+                            type="password"
+                            name="password"
+                             minlength="6" maxlength="128" autocomplete="new-password" id="password"
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                             placeholder="Min. 6 karakter"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="toggle-password-btn absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                             data-target="password"
                             title="Tampilkan Password"
@@ -139,16 +139,16 @@
                 <div class="space-y-1.5">
                     <label for="password_confirmation" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Konfirmasi Password</label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            name="password_confirmation" 
-                            id="password_confirmation" 
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            id="password_confirmation"
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                             placeholder="Ulangi password"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="toggle-password-btn absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                             data-target="password_confirmation"
                             title="Tampilkan Password"
@@ -167,14 +167,14 @@
 
             <!-- Submit Button -->
             <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                <a 
-                    href="{{ route('users.index') }}" 
+                <a
+                    href="{{ route('users.index') }}"
                     class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg font-bold text-xs transition-all cursor-pointer"
                 >
                     Batal
                 </a>
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     class="px-5 py-2.5 bg-[#1e5eff] hover:bg-blue-700 text-white rounded-lg font-bold text-xs shadow-md shadow-blue-500/10 hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                     <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -187,34 +187,5 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleButtons = document.querySelectorAll('.toggle-password-btn');
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const targetId = this.getAttribute('data-target');
-                const passwordInput = document.getElementById(targetId);
-                if (!passwordInput) return;
 
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
-
-                const eyeOpen = this.querySelector('.eye-open');
-                const eyeClosed = this.querySelector('.eye-closed');
-
-                if (type === 'password') {
-                    eyeOpen.classList.remove('hidden');
-                    eyeClosed.classList.add('hidden');
-                    this.setAttribute('title', 'Tampilkan Password');
-                } else {
-                    eyeOpen.classList.add('hidden');
-                    eyeClosed.classList.remove('hidden');
-                    this.setAttribute('title', 'Sembunyikan Password');
-                }
-            });
-        });
-    });
-</script>
 @endsection

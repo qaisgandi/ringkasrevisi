@@ -4,15 +4,15 @@
 
 @section('content')
 <!-- Include Lucide CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <div class="space-y-8 fade-in">
-    
+
     <!-- HEADER SECTION -->
     <div class="relative bg-white rounded-2xl shadow-md border border-slate-100 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden">
         <!-- Decorative Background Circle -->
         <div class="absolute -top-16 -right-16 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl -z-10"></div>
-        
+
         <div class="space-y-1">
             <h1 class="heading-font text-2xl font-extrabold text-bps-navy tracking-tight">
                 Aktivitas Sistem
@@ -25,7 +25,7 @@
         <div class="shrink-0 flex items-center gap-3">
             @if ($activities->total() > 0)
                 <!-- Clear Logs Button -->
-                <button 
+                <button
                     onclick="openClearModal()"
                     class="inline-flex items-center gap-2 px-5 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-2xl font-bold border border-rose-100/50 transition-all duration-200 text-sm"
                 >
@@ -57,18 +57,18 @@
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
                 </span>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     name="search"
                     value="{{ request('search') }}"
-                    placeholder="Cari aktivitas..." 
+                    placeholder="Cari aktivitas..."
                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 font-medium focus:outline-none focus:border-bps-primary focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200"
                 >
             </div>
 
             <!-- Type Filter -->
-            <select 
-                name="type" 
+            <select
+                name="type"
                 onchange="this.form.submit()"
                 class="px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white transition-all min-w-[150px]"
             >
@@ -80,8 +80,8 @@
 
             @if (request('search') || request('type'))
                 <!-- Reset Filter Link -->
-                <a 
-                    href="{{ route('activities.index') }}" 
+                <a
+                    href="{{ route('activities.index') }}"
                     class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded-xl font-bold text-xs transition-all"
                 >
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
@@ -98,12 +98,12 @@
                 <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mb-4 border border-slate-100">
                     <i data-lucide="info" class="w-8 h-8"></i>
                 </div>
-                <h3 class="heading-font text-base font-bold text-slate-700">Belum Ada Aktivitas</h3>
+                <h3 class="heading-font text-base font-bold text-slate-700">{{ request('search') || (request('type') && request('type') !== 'all') ? 'Tidak ada aktivitas yang sesuai' : 'Belum Ada Aktivitas' }}</h3>
                 <p class="text-sm text-slate-400 mt-1 max-w-sm">
                     @if (request('search') || request('type'))
                         Pencarian Anda tidak menemukan log aktivitas yang cocok.
                     @else
-                        Belum ada aktivitas yang dicatat oleh sistem saat ini.
+                        {{ request('search') || (request('type') && request('type') !== 'all') ? 'Coba kata pencarian lain atau hapus filter.' : 'Riwayat unggahan, pembaruan, dan pemrosesan akan muncul setelah ada aktivitas.' }}
                     @endif
                 </p>
             </div>
@@ -148,7 +148,7 @@
                                     {{ $activity->created_at->format('d M Y H:i') }}
                                 </span>
                             </div>
-                            
+
                             <p class="text-xs text-slate-500 leading-relaxed font-medium max-w-3xl">
                                 {{ $activity->message }}
                             </p>
@@ -185,8 +185,8 @@
         </p>
 
         <div class="flex items-center gap-3 w-full">
-            <button 
-                onclick="closeClearModal()" 
+            <button
+                onclick="closeClearModal()"
                 class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-2xl transition-all duration-200 text-xs"
             >
                 Batal
@@ -194,8 +194,8 @@
             <form action="{{ route('activities.clear') }}" method="POST" class="m-0 w-full">
                 @csrf
                 @method('DELETE')
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     class="w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-rose-500/25 transition-all duration-200 text-xs"
                 >
                     Ya, Hapus Semua

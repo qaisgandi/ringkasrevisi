@@ -56,16 +56,16 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.settings.update') }}" method="POST" class="space-y-5">
+            <form action="{{ route('account.settings.update') }}" method="POST" data-submit-state class="space-y-5">
                 @csrf
-                
+
                 <!-- Nama Lengkap -->
                 <div class="space-y-1.5">
                     <label for="name" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Nama Lengkap</label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        id="name" 
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
                         value="{{ old('name', $user->name) }}"
                         required
                         class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -79,10 +79,10 @@
                         <label for="username" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Username</label>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm font-semibold select-none">@</span>
-                            <input 
-                                type="text" 
-                                name="username" 
-                                id="username" 
+                            <input
+                                type="text"
+                                name="username"
+                                id="username"
                                 value="{{ old('username', $user->username) }}"
                                 required
                                 class="w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -94,10 +94,10 @@
                     <!-- Email -->
                     <div class="space-y-1.5">
                         <label for="email" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Alamat Email</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            id="email" 
+                        <input
+                            type="email"
+                            name="email"
+                            id="email"
                             value="{{ old('email', $user->email) }}"
                             required
                             class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
@@ -107,8 +107,8 @@
                 </div>
 
                 <div class="pt-2 flex justify-end">
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         class="px-6 py-3 bg-[#1e5eff] hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md shadow-blue-500/10 hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
                     >
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -134,23 +134,23 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.settings.password') }}" method="POST" class="space-y-4">
+            <form action="{{ route('account.settings.password') }}" method="POST" data-submit-state class="space-y-4">
                 @csrf
-                
+
                 <!-- Password Lama -->
                 <div class="space-y-1.5">
                     <label for="old_password" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Password Lama</label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            name="old_password" 
-                            id="old_password" 
+                        <input
+                            type="password"
+                            name="old_password"
+                            id="old_password"
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                             placeholder="••••••••"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="toggle-password-btn absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                             data-target="old_password"
                             title="Tampilkan Password"
@@ -170,16 +170,16 @@
                 <div class="space-y-1.5">
                     <label for="password" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Password Baru</label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            name="password" 
-                            id="password" 
+                        <input
+                            type="password"
+                            name="password"
+                             minlength="6" maxlength="128" autocomplete="new-password" id="password"
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                             placeholder="Min. 6 karakter"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="toggle-password-btn absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                             data-target="password"
                             title="Tampilkan Password"
@@ -199,16 +199,16 @@
                 <div class="space-y-1.5">
                     <label for="password_confirmation" class="text-xs font-bold text-slate-600 uppercase tracking-wider block">Konfirmasi Password</label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            name="password_confirmation" 
-                            id="password_confirmation" 
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            id="password_confirmation"
                             required
                             class="w-full pl-4 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-[#1e5eff] focus:ring-4 focus:ring-blue-100 transition-all text-sm font-medium"
                             placeholder="••••••••"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             class="toggle-password-btn absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                             data-target="password_confirmation"
                             title="Tampilkan Password"
@@ -225,9 +225,9 @@
                 </div>
 
                 <div class="pt-2">
-                    <button 
-                        type="submit" 
-                        class="w-full px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    <button
+                        type="submit"
+                        class="w-full px-5 py-3 bg-bps-navy hover:bg-slate-800 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />

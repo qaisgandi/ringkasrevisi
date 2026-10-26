@@ -38,7 +38,7 @@
     }
 
     $aiResult = $publication->aiResult;
-    
+
     // Normalization / Fallback for existing publications
     $summary = $aiResult ? $aiResult->summary : $publication->summary;
     $topics = $aiResult ? $aiResult->topics : $publication->topics;
@@ -126,7 +126,7 @@
                     $trendText = 'Menurun';
                     $trendIcon = '📉';
                 }
-                
+
                 $indicatorName = preg_replace('/\s*(meningkat|naik|tumbuh|bertambah|tinggi|menurun|turun|menyusut|berkurang|rendah|stabil)\b/i', '', $tr);
                 $normalizedTrends[] = [
                     'indicator' => trim($indicatorName),
@@ -154,8 +154,10 @@
 @section('title', $publication->title)
 
 @section('content')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+<div class="rk-reading">
     <div class="max-w-7xl w-full mx-auto px-4 py-8 md:py-12 space-y-8">
-        
+
         <!-- Top Navigation / Breadcrumbs -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div class="space-y-1">
@@ -167,7 +169,7 @@
                     <span class="text-slate-600 font-bold truncate max-w-[200px] sm:max-w-[400px]">{{ $publication->title }}</span>
                 </div>
             </div>
-            
+
             <a href="{{ route('home') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-bps-lightBlue transition-colors bg-slate-50 hover:bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm self-start">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 <span>Kembali ke Beranda</span>
@@ -176,7 +178,7 @@
 
         <!-- Main Content Columns -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
-            
+
             <!-- Left Column: Cover & Details (4 cols) -->
             <div class="lg:col-span-4 space-y-6">
                 <!-- Physical Book Cover Shadow Container -->
@@ -193,7 +195,7 @@
                         <div id="pdf-cover-placeholder" class="relative w-full h-full bg-gradient-to-br {{ $coverGradient }} text-white p-4 flex flex-col justify-between border-r-4 border-black/10 overflow-hidden shrink-0 transform hover:scale-[1.03] transition-transform duration-300">
                             <!-- Spine shadow effect -->
                             <div class="absolute left-0 top-0 bottom-0 w-2.5 bg-white/5 border-r border-white/10 rounded-l-xl"></div>
-                            
+
                             <!-- Top Code -->
                             <div class="flex items-center gap-1 pl-1">
                                 <div class="w-1.5 h-1.5 bg-bps-orange rounded-full"></div>
@@ -249,8 +251,8 @@
 
                     <!-- PDF Download Button -->
                     @if ($publication->pdf_path)
-                        <a 
-                            href="{{ Storage::url($publication->pdf_path) }}" 
+                        <a
+                            href="{{ Storage::url($publication->pdf_path) }}"
                             download
                             class="w-full py-3 bg-bps-lightBlue hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/15 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
@@ -279,7 +281,7 @@
                 @if ($publication->status === 'Selesai' && ($summary || $aiResult))
                     <!-- AI RESULT DETAILS IN AN EXECUTIVE DASHBOARD LAYOUT -->
                     <div class="space-y-6">
-                        
+
                         <!-- Row 1: 1. Ringkasan Publikasi (Full Width) -->
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
                             <h3 class="heading-font text-lg font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -299,7 +301,7 @@
 
                         <!-- Row 2: 2. Informasi Publikasi & 3. Topik & 4. Kata Kunci (Side-by-Side) -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
+
                             <!-- Left: 2. Informasi Publikasi -->
                             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4 flex flex-col justify-between">
                                 <div class="space-y-4">
@@ -403,7 +405,7 @@
 
                         <!-- Row 4: 6. Indikator Utama & 7. Tren Utama (Side-by-Side) -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
+
                             <!-- Left: 6. Indikator Utama -->
                             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
                                 <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -470,7 +472,7 @@
 
                         <!-- Row 5: 8. Lokasi Pembahasan & 9. Kesimpulan (Side-by-Side) -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
+
                             <!-- Left: 8. Lokasi Pembahasan -->
                             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
                                 <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -533,17 +535,16 @@
     </div> <!-- Close Outer Div -->
 
     <!-- Include PDF.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
 
             // PDF.js Cover Page Rendering
             const canvas = document.getElementById('pdf-cover-canvas');
             const placeholder = document.getElementById('pdf-cover-placeholder');
-            const pdfUrl = '{{ Storage::url($publication->pdf_path) }}';
+            const pdfUrl = @json(Storage::url($publication->pdf_path));
 
-            if (pdfUrl) {
+            if (pdfUrl && window.pdfjsLib) {
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
@@ -581,4 +582,5 @@
             }
         });
     </script>
+</div>
 @endsection

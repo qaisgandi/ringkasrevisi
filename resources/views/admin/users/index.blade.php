@@ -8,11 +8,11 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex flex-col gap-1">
             <h1 class="heading-font text-2xl md:text-3xl font-extrabold text-[#0f2a4a] tracking-tight">Manajemen User</h1>
-            <p class="text-sm text-slate-500 font-medium">Kelola daftar akun administrator yang memiliki akses ke sistem</p>
+            <p class="text-sm text-slate-500 font-medium">Kelola akun pengguna dan administrator beserta peran aksesnya.</p>
         </div>
         <div>
-            <a 
-                href="{{ route('users.create') }}" 
+            <a
+                href="{{ route('users.create') }}"
                 class="px-5 py-3 bg-[#1e5eff] hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md shadow-blue-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
                 <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -55,24 +55,24 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                     </svg>
                 </span>
-                <input 
-                    type="text" 
-                    name="search" 
+                <input
+                    type="text"
+                    name="search"
                     value="{{ request('search') }}"
-                    placeholder="Cari user berdasarkan nama, username, atau email..." 
+                    placeholder="Cari user berdasarkan nama, username, atau email..."
                     class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200/60 focus:border-[#1e5eff] rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100/50 transition-all text-sm font-medium"
                 >
             </div>
             <div class="flex gap-2 w-full sm:w-auto">
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     class="flex-1 sm:flex-initial px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-sm transition-all cursor-pointer"
                 >
                     Cari
                 </button>
                 @if (request()->filled('search'))
-                    <a 
-                        href="{{ route('users.index') }}" 
+                    <a
+                        href="{{ route('users.index') }}"
                         class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-sm transition-all flex items-center justify-center cursor-pointer"
                         title="Reset Pencarian"
                     >
@@ -138,8 +138,8 @@
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <!-- Edit Link -->
-                                    <a 
-                                        href="{{ route('users.edit', $u->id) }}" 
+                                    <a
+                                        href="{{ route('users.edit', $u->id) }}"
                                         class="p-2 text-slate-400 hover:text-[#1e5eff] hover:bg-blue-50 rounded-xl transition-all"
                                         title="Ubah Data User"
                                     >
@@ -150,9 +150,9 @@
 
                                     <!-- Delete Button -->
                                     @if ($isCurrentUser)
-                                        <button 
-                                            type="button" 
-                                            class="p-2 text-slate-300 cursor-not-allowed" 
+                                        <button
+                                            type="button"
+                                            class="p-2 text-slate-300 cursor-not-allowed"
                                             title="Anda tidak dapat menghapus akun Anda sendiri"
                                             disabled
                                         >
@@ -161,16 +161,16 @@
                                             </svg>
                                         </button>
                                     @else
-                                        <form 
-                                            action="{{ route('users.destroy', $u->id) }}" 
-                                            method="POST" 
+                                        <form
+                                            action="{{ route('users.destroy', $u->id) }}"
+                                            method="POST"
                                             class="m-0 inline"
                                             onsubmit="return confirm('Apakah Anda yakin ingin menghapus user \'{{ $u->username }}\' dari sistem? Tindakan ini tidak dapat dibatalkan.')"
                                         >
                                             @csrf
                                             @method('DELETE')
-                                            <button 
-                                                type="submit" 
+                                            <button
+                                                type="submit"
                                                 class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
                                                 title="Hapus User"
                                             >

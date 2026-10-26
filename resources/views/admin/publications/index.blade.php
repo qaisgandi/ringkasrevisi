@@ -3,17 +3,17 @@
 @section('title', ($activeMenu === 'summaries' ? 'Daftar Ringkasan Publikasi' : 'Daftar Publikasi') . ' - Sistem Ringkasan & Manajemen Publikasi Statistik BPS')
 
 @section('content')
-<!-- Include PDF.js & Lucide CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+<!-- PDF.js is used for the document thumbnails below. -->
+
 
 <div class="space-y-8 fade-in">
-    
+
     <!-- HEADER SECTION -->
     <div class="relative bg-white rounded-2xl shadow-md border border-slate-100 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden">
         <!-- Decorative Background Circle -->
         <div class="absolute -top-16 -right-16 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl -z-10"></div>
-        
+
         <div class="space-y-1">
             <h1 class="heading-font text-2xl font-extrabold text-bps-navy tracking-tight">
                 {{ $activeMenu === 'summaries' ? 'Ringkasan Publikasi' : 'Daftar Publikasi' }}
@@ -24,15 +24,9 @@
         </div>
 
         <div class="shrink-0 flex items-center gap-4">
-            <!-- Decorative Icon Art -->
-            <div class="hidden sm:flex w-16 h-16 rounded-2xl bg-blue-50/70 border border-blue-100/50 items-center justify-center relative shadow-sm">
-                <i data-lucide="sparkles" class="w-6 h-6 text-bps-primary animate-pulse"></i>
-                <div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-bps-orange rounded-lg flex items-center justify-center text-[9px] font-black text-white shadow-md">AI</div>
-            </div>
-            
             @if ($activeMenu !== 'summaries')
-                <a 
-                    href="{{ route('publications.create') }}" 
+                <a
+                    href="{{ route('publications.create') }}"
                     class="inline-flex items-center gap-2 px-5 py-3 bg-bps-primary hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                 >
                     <i data-lucide="plus" class="w-4 h-4"></i>
@@ -73,7 +67,7 @@
         <div id="success-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <!-- Backdrop with blur -->
             <div id="modal-backdrop" onclick="closeSuccessModal()" class="fixed inset-0 bg-slate-900/45 backdrop-blur-sm transition-opacity duration-300 ease-out opacity-0"></div>
-            
+
             <!-- Modal Card -->
             <div id="modal-card" class="relative bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-100/80 flex flex-col items-center text-center transform scale-90 opacity-0 transition-all duration-300 ease-out z-10">
                 <!-- Close Button -->
@@ -94,8 +88,8 @@
                     </p>
 
                     <!-- Button Selesai (Rose) -->
-                    <button 
-                        onclick="closeSuccessModal()" 
+                    <button
+                        onclick="closeSuccessModal()"
                         class="w-full py-3 px-5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-rose-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
                         Selesai
@@ -113,8 +107,8 @@
                     </p>
 
                     <!-- Button Selesai (Amber) -->
-                    <button 
-                        onclick="closeSuccessModal()" 
+                    <button
+                        onclick="closeSuccessModal()"
                         class="w-full py-3 px-5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
                         Selesai
@@ -132,8 +126,8 @@
                     </p>
 
                     <!-- Button Selesai (Emerald) -->
-                    <button 
-                        onclick="closeSuccessModal()" 
+                    <button
+                        onclick="closeSuccessModal()"
                         class="w-full py-3 px-5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
                         Selesai
@@ -189,13 +183,13 @@
 
     <!-- STATS CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Card 1: Total Ringkasan -->
+        <!-- Card 1: Total Publikasi -->
         <div class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all duration-300">
             <div class="w-12 h-12 rounded-xl bg-blue-50 text-bps-primary flex items-center justify-center group-hover:bg-bps-primary group-hover:text-white transition-all duration-300 shrink-0">
                 <i data-lucide="file-text" class="w-6 h-6"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Ringkasan</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Publikasi</p>
                 <h3 class="heading-font text-2xl font-black text-bps-navy mt-0.5">{{ $totalPublicationsCount }}</h3>
                 <p class="text-[10px] text-slate-400 font-semibold">Semua publikasi</p>
             </div>
@@ -213,15 +207,15 @@
             </div>
         </div>
 
-        <!-- Card 3: Sedang Diproses -->
+        <!-- Card 3: Belum Selesai -->
         <div class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all duration-300">
             <div class="w-12 h-12 rounded-xl bg-amber-50 text-bps-orange flex items-center justify-center group-hover:bg-bps-orange group-hover:text-white transition-all duration-300 shrink-0">
                 <i data-lucide="clock" class="w-6 h-6 animate-spin-slow"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sedang Diproses</p>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Belum Selesai</p>
                 <h3 class="heading-font text-2xl font-black text-bps-navy mt-0.5">{{ $totalPendingCount }}</h3>
-                <p class="text-[10px] text-slate-400 font-semibold">Sedang dianalisis</p>
+                <p class="text-[10px] text-slate-400 font-semibold">Menunggu atau perlu diproses</p>
             </div>
         </div>
 
@@ -240,7 +234,7 @@
 
     <!-- FILTER & TOOLBAR SECTION -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 md:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        
+
         <!-- Left: Search & Select Dropdowns -->
         <div class="flex flex-wrap items-center gap-3 flex-1">
             <!-- Search bar -->
@@ -248,17 +242,17 @@
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
                 </span>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     id="local-search"
-                    placeholder="Cari berdasarkan judul, topik, atau kata kunci..." 
+                    aria-label="Cari pada daftar yang ditampilkan" placeholder="Cari pada daftar yang ditampilkan..."
                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 font-medium focus:outline-none focus:border-bps-primary focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all duration-200"
                 >
             </div>
 
             <!-- Category Filter -->
-            <select 
-                id="filter-category" 
+            <select
+                id="filter-category" aria-label="Filter kategori publikasi"
                 class="custom-select px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white transition-all"
             >
                 <option value="all" {{ request('category') == '' ? 'selected' : '' }}>Semua Kategori</option>
@@ -271,8 +265,8 @@
             @php
                 $years = \App\Models\Publication::pluck('year')->unique()->sortDesc();
             @endphp
-            <select 
-                id="filter-year" 
+            <select
+                id="filter-year" aria-label="Filter tahun publikasi"
                 class="custom-select px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white transition-all"
             >
                 <option value="all" {{ request('year') == '' ? 'selected' : '' }}>Semua Tahun</option>
@@ -282,8 +276,8 @@
             </select>
 
             <!-- Status Filter -->
-            <select 
-                id="filter-status" 
+            <select
+                id="filter-status" aria-label="Filter status publikasi"
                 class="custom-select px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white transition-all"
             >
                 <option value="all" {{ request('status') == '' ? 'selected' : '' }}>Semua Status</option>
@@ -292,8 +286,8 @@
             </select>
 
             <!-- Reset Button -->
-            <button 
-                id="btn-reset-filters" 
+            <button
+                id="btn-reset-filters"
                 class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded-xl font-bold text-xs transition-all"
             >
                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
@@ -304,8 +298,8 @@
         <!-- Right: Sort & Layout Toggles -->
         <div class="flex items-center justify-between xl:justify-end gap-4 border-t xl:border-t-0 border-slate-100 pt-3 xl:pt-0">
             <!-- Sort selector -->
-            <select 
-                id="sort-order" 
+            <select
+                id="sort-order" aria-label="Urutan publikasi"
                 class="custom-select px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white transition-all"
             >
                 <option value="newest">Terbaru</option>
@@ -316,16 +310,16 @@
 
             <!-- Layout Switchers -->
             <div class="flex items-center border border-slate-200 rounded-xl p-1 bg-slate-50/50 shrink-0">
-                <button 
-                    id="btn-layout-grid" 
-                    class="p-1.5 rounded-lg text-bps-primary bg-white shadow-sm transition-all" 
+                <button
+                    id="btn-layout-grid"
+                    class="p-1.5 rounded-lg text-bps-primary bg-white shadow-sm transition-all"
                     title="Grid View"
                 >
                     <i data-lucide="layout-grid" class="w-4 h-4"></i>
                 </button>
-                <button 
-                    id="btn-layout-list" 
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-all" 
+                <button
+                    id="btn-layout-list"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 transition-all"
                     title="List View"
                 >
                     <i data-lucide="list" class="w-4 h-4"></i>
@@ -340,13 +334,13 @@
             <div class="w-20 h-20 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mb-4">
                 <i data-lucide="file-warning" class="w-10 h-10"></i>
             </div>
-            <h3 class="heading-font text-base font-bold text-slate-700">Belum Ada Publikasi</h3>
-            <p class="text-sm text-slate-400 mt-1 max-w-sm">Daftar publikasi statistik Anda masih kosong. Silakan unggah dokumen PDF baru untuk memulai.</p>
+            <h3 class="heading-font text-base font-bold text-slate-700">{{ request('search') || request('category') || request('status') ? 'Tidak ada publikasi yang sesuai' : 'Belum Ada Publikasi' }}</h3>
+            <p class="text-sm text-slate-400 mt-1 max-w-sm">{{ request('search') || request('category') || request('status') ? 'Ubah pencarian atau hapus filter untuk melihat publikasi lain.' : 'Unggah dokumen PDF untuk menambahkan publikasi pertama.' }}</p>
         </div>
     @else
         <!-- Grid layout container -->
-        <div 
-            id="publications-container" 
+        <div
+            id="publications-container"
             class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-all duration-300"
         >
             @foreach ($publications as $publication)
@@ -360,8 +354,8 @@
                         $tagStr .= ' ' . implode(' ', $publication->keywords);
                     }
                 @endphp
-                <div 
-                    class="pub-card bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 p-5 flex gap-4 h-full relative" 
+                <div
+                    class="pub-card bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 p-5 flex gap-4 h-full relative"
                     data-title="{{ strtolower($publication->title) }}"
                     data-category="{{ $publication->category }}"
                     data-year="{{ $publication->year }}"
@@ -371,8 +365,8 @@
                 >
                     <!-- Left side: Cover Canvas (rendered via PDF.js) -->
                     <div class="w-24 sm:w-28 h-36 sm:h-40 shrink-0 rounded-xl relative overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group/cover select-none">
-                        <canvas class="pdf-canvas w-full h-full object-contain hidden" data-pdf-url="/storage/{{ $publication->pdf_path }}"></canvas>
-                        
+                        <canvas class="pdf-canvas w-full h-full object-contain hidden" data-pdf-url="{{ Storage::url($publication->pdf_path) }}"></canvas>
+
                         <!-- Fallback BPS CSS Cover -->
                         <div class="pdf-placeholder w-full h-full bg-gradient-to-br from-bps-navy to-blue-900 flex flex-col justify-between p-3 text-white transition-opacity duration-300">
                             <span class="text-[7px] font-black uppercase text-bps-orange tracking-widest leading-none">BPS</span>
@@ -388,7 +382,7 @@
                                 <span class="text-[10px] font-extrabold text-bps-primary tracking-wide truncate">
                                     {{ $publication->category }}
                                 </span>
-                                
+
                                 <!-- Status Badge -->
                                 @if ($publication->status === 'Selesai')
                                     <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-bold select-none shrink-0" title="Proses ekstraksi telah selesai">
@@ -461,8 +455,8 @@
                                     <!-- Lakukan Ringkas Form Button -->
                                     <form action="{{ route('publications.extract', $publication) }}" method="POST" class="m-0 flex-1">
                                         @csrf
-                                        <button 
-                                            type="submit" 
+                                        <button
+                                            type="submit"
                                             class="w-full py-2 bg-bps-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-500/10 hover:shadow-blue-500/25 transition-all text-xs text-center flex items-center justify-center gap-1.5"
                                         >
                                             <i data-lucide="play" class="w-3 h-3"></i>
@@ -471,8 +465,8 @@
                                     </form>
                                 @else
                                     <!-- Full Width Detail Link -->
-                                    <a 
-                                        href="{{ route('publications.show', $publication) }}" 
+                                    <a
+                                        href="{{ route('publications.show', $publication) }}"
                                         class="flex-1 py-2 bg-blue-50 hover:bg-blue-100 text-bps-primary border border-blue-100 hover:border-blue-200 font-bold rounded-xl transition-all text-xs text-center flex items-center justify-center gap-1 group/btn"
                                     >
                                         <span>Lihat Detail</span>
@@ -481,7 +475,7 @@
                                 @endif
 
                                 <!-- Edit Link -->
-                                <a 
+                                <a
                                     href="{{ route('publications.edit', $publication) }}"
                                     class="px-2.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl transition-all flex items-center justify-center shrink-0"
                                     title="Edit Publikasi"
@@ -490,8 +484,8 @@
                                 </a>
 
                                 <!-- Hapus Button -->
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     data-delete-url="{{ route('publications.destroy', $publication, false) }}"
                                     data-pub-title="{{ $publication->title }}"
                                     class="btn-delete px-2.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 transition-all font-bold rounded-xl flex items-center justify-center shrink-0"
@@ -505,7 +499,7 @@
                 </div>
             @endforeach
         </div>
-        
+
         <!-- Search/Filter empty notification -->
         <div id="search-empty-state" class="hidden bg-white rounded-2xl shadow-sm border border-slate-100 p-16 text-center flex flex-col items-center justify-center">
             <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mb-4">
@@ -513,7 +507,7 @@
             </div>
             <h3 class="heading-font text-base font-bold text-slate-700">Pencarian Tidak Ditemukan</h3>
             <p class="text-sm text-slate-400 mt-1 max-w-sm">Tidak ada ringkasan publikasi yang cocok dengan kriteria filter atau kata kunci Anda.</p>
-            <button 
+            <button
                 onclick="resetFilters()"
                 class="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all"
             >
@@ -523,10 +517,10 @@
     @endif
 
     <!-- DELETE CONFIRMATION MODAL -->
-    <div id="delete-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div id="delete-modal" role="dialog" aria-modal="true" aria-label="Konfirmasi hapus publikasi" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
         <!-- Backdrop -->
         <div id="delete-backdrop" onclick="closeDeleteModal()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
-        
+
         <!-- Card -->
         <div id="delete-card" class="relative bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-100 flex flex-col items-center text-center transform scale-90 opacity-0 transition-all duration-300 ease-out z-10">
             <!-- Close Button -->
@@ -547,8 +541,8 @@
 
             <!-- Buttons Grid -->
             <div class="grid grid-cols-2 gap-3 w-full">
-                <button 
-                    onclick="closeDeleteModal()" 
+                <button
+                    onclick="closeDeleteModal()"
                     class="w-full py-3 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-2xl transition-all duration-200 text-sm"
                 >
                     Batal
@@ -556,8 +550,8 @@
                 <form id="delete-form" method="POST" class="m-0 w-full">
                     @csrf
                     @method('DELETE')
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         class="w-full py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-2xl shadow-lg shadow-rose-500/10 hover:shadow-rose-500/25 transition-all duration-200 text-sm"
                     >
                         Ya, Hapus
@@ -582,7 +576,7 @@
 
             <!-- Text Title -->
             <h3 class="heading-font text-lg font-extrabold text-bps-navy tracking-tight mb-2">Mengekstrak & Meringkas</h3>
-            
+
             <!-- Text Subtitle / Progress -->
             <p id="loading-text" class="text-sm text-slate-500 leading-relaxed font-semibold">
                 Menjalankan AI untuk menganalisis isi dokumen PDF...
@@ -597,18 +591,17 @@
 <!-- CLIENT-SIDE FILTERING, SORTING, LAYOUT TOGGLING, AND PDF COVER RENDERING -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
 
         // 1. PDF.js Cover Page Rendering Loop
         // Configure PDF.js worker URL
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-        
+
         const canvases = document.querySelectorAll('.pdf-canvas');
         canvases.forEach(function(canvas) {
             const pdfUrl = canvas.getAttribute('data-pdf-url');
             const placeholder = canvas.nextElementSibling; // the placeholder div
-            
-            if (pdfUrl) {
+
+            if (pdfUrl && window.pdfjsLib) {
                 // Load PDF and render first page
                 pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
                     return pdf.getPage(1);
@@ -714,8 +707,9 @@
         if (yearFilter) yearFilter.addEventListener('change', filterAndSort);
         if (statusFilter) statusFilter.addEventListener('change', filterAndSort);
         if (sortOrder) sortOrder.addEventListener('change', filterAndSort);
-        
+
         function resetFilters() {
+            if (window.location.search) { window.location.href = @json(route('publications.index')); return; }
             if (searchInput) searchInput.value = '';
             if (categoryFilter) {
                 categoryFilter.value = 'all';
@@ -736,6 +730,7 @@
             filterAndSort();
         }
 
+        window.resetFilters = resetFilters;
         if (btnReset) {
             btnReset.addEventListener('click', resetFilters);
         }
@@ -774,17 +769,20 @@
         const deleteForm = document.getElementById('delete-form');
         const deleteTitleSpan = document.getElementById('delete-pub-title');
 
+        let deleteTrigger = null;
         deleteButtons.forEach(btn => {
             btn.addEventListener('click', function() {
                 const actionUrl = this.getAttribute('data-delete-url');
                 const publicationTitle = this.getAttribute('data-pub-title');
 
                 if (deleteForm && deleteTitleSpan && deleteModal && deleteBackdrop && deleteCard) {
+                    deleteTrigger = this;
                     deleteForm.action = actionUrl;
                     deleteTitleSpan.textContent = publicationTitle;
 
                     deleteModal.classList.remove('hidden');
                     deleteModal.classList.add('flex');
+                    deleteModal.querySelector('button')?.focus();
 
                     setTimeout(() => {
                         deleteBackdrop.classList.remove('opacity-0');
@@ -810,6 +808,7 @@
                 setTimeout(() => {
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
+                    deleteTrigger?.focus();
                 }, 300);
             }
         };
@@ -826,21 +825,7 @@
                     loadingOverlay.classList.add('flex');
                 }
 
-                const messages = [
-                    "Membaca berkas PDF...",
-                    "Mengekstrak seluruh teks halaman...",
-                    "Menjalankan AI untuk analisis isi...",
-                    "Mendeteksi indikator statistik utama...",
-                    "Menyusun poin-poin ringkasan...",
-                    "Menghubungkan referensi halaman..."
-                ];
-                let idx = 0;
-                setInterval(() => {
-                    if (loadingText) {
-                        loadingText.textContent = messages[idx % messages.length];
-                        idx++;
-                    }
-                }, 2500);
+                if (loadingText) loadingText.textContent = 'Memproses dokumen dan menyusun ringkasan. Tunggu hingga server selesai.';
             });
         });
 
@@ -861,7 +846,7 @@
                 const trigger = document.createElement('button');
                 trigger.type = 'button';
                 trigger.className = 'w-full flex items-center justify-between gap-3 px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-600 font-bold focus:outline-none focus:border-bps-primary focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all select-none';
-                
+
                 const label = document.createElement('span');
                 label.className = 'custom-select-label truncate';
                 label.textContent = selectedOption.textContent;
@@ -874,10 +859,10 @@
 
                 const menu = document.createElement('div');
                 menu.className = 'absolute z-50 left-0 right-0 mt-2 bg-white rounded-2xl border border-slate-100 shadow-xl py-2 hidden flex-col transition-all transform scale-95 opacity-0 origin-top';
-                
+
                 const scrollContainer = document.createElement('div');
                 scrollContainer.className = 'max-h-60 overflow-y-auto space-y-0.5 px-1.5';
-                
+
                 options.forEach(opt => {
                     const optBtn = document.createElement('button');
                     optBtn.type = 'button';
@@ -905,7 +890,7 @@
                         e.stopPropagation();
                         select.value = opt.value;
                         select.dispatchEvent(new Event('change', { bubbles: true }));
-                        
+
                         label.textContent = opt.textContent;
 
                         Array.from(scrollContainer.children).forEach(child => {
@@ -934,7 +919,7 @@
                 select.parentNode.insertBefore(wrapper, select.nextSibling);
 
                 let isOpen = false;
-                
+
                 function openMenu() {
                     isOpen = true;
                     menu.classList.remove('hidden');
@@ -996,7 +981,7 @@
                     if (currentOpt) {
                         label.textContent = currentOpt.textContent;
                     }
-                    
+
                     Array.from(scrollContainer.children).forEach(child => {
                         const check = child.querySelector('[data-lucide="check"]');
                         const val = child.getAttribute('data-value');
@@ -1016,7 +1001,7 @@
             }
         }
 
-        initializeCustomSelects();
+        // Native select controls preserve keyboard and mobile interaction.
 
         // Run initial filtering on page load to apply initial values of dropdowns
         filterAndSort();

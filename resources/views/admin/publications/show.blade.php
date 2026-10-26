@@ -3,15 +3,17 @@
 @section('title', 'Detail Publikasi - Sistem Ringkasan & Manajemen Publikasi Statistik BPS')
 
 @section('content')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" defer></script>
+<div class="rk-reading">
 <!-- Include Lucide Icons CDN -->
-<script src="https://unpkg.com/lucide@latest"></script>
+
 
 <div class="w-full space-y-8 fade-in">
 
     <!-- HEADER / NAVIGATION BACK -->
     <div class="flex items-center gap-4">
-        <a 
-            href="{{ route('publications.index') }}" 
+        <a
+            href="{{ route('publications.index') }}"
             class="p-2 bg-white hover:bg-slate-50 border border-slate-100 rounded-xl text-slate-500 hover:text-slate-700 transition-colors shadow-sm"
             title="Kembali ke Daftar Publikasi"
         >
@@ -60,7 +62,7 @@
     <!-- MAIN CARD: HEADER INFO -->
     <div class="bg-white rounded-xl shadow-md border border-slate-100 p-6 md:p-8">
         <div class="flex flex-col lg:flex-row gap-8 items-start">
-            
+
             <!-- COLUMN 1: BOOK COVER THUMBNAIL (PDF OR CSS FALLBACK) -->
             <div class="w-full sm:w-56 h-80 shrink-0 rounded-2xl shadow-lg relative overflow-hidden border border-slate-200 bg-slate-50 select-none group">
                 <!-- PDF Canvas Cover (rendered via PDF.js) -->
@@ -71,7 +73,7 @@
                     <!-- Decorative Top Graphic -->
                     <div class="absolute -top-10 -right-10 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
                     <div class="absolute top-0 left-0 right-0 h-1.5 bg-bps-orange"></div>
-                    
+
                     <!-- BPS Top Banner -->
                     <div class="flex items-center justify-between z-10">
                         <span class="text-[9px] font-black tracking-widest text-bps-orange uppercase">Badan Pusat Statistik</span>
@@ -126,25 +128,25 @@
 
                 <!-- Action Button Grid -->
                 <div class="flex flex-wrap gap-3">
-                    <a 
-                        href="/storage/{{ $publication->pdf_path }}" 
-                        target="_blank" 
+                    <a
+                        href="{{ Storage::url($publication->pdf_path) }}"
+                        target="_blank"
                         class="inline-flex items-center gap-2 px-5 py-3 bg-bps-primary hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
                         <i data-lucide="eye" class="w-4 h-4"></i>
                         <span>Lihat PDF</span>
                     </a>
-                    
-                    <a 
-                        href="/storage/{{ $publication->pdf_path }}" 
+
+                    <a
+                        href="{{ Storage::url($publication->pdf_path) }}"
                         download="{{ basename($publication->pdf_path) }}"
                         class="inline-flex items-center gap-2 px-5 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-semibold transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
                         <i data-lucide="download" class="w-4 h-4"></i>
                         <span>Download PDF</span>
                     </a>
-                    
-                    <a 
+
+                    <a
                         href="{{ route('publications.edit', $publication) }}"
                         class="inline-flex items-center gap-2 px-4 py-3 bg-white hover:bg-slate-50 text-slate-500 border border-slate-200 rounded-2xl font-semibold transition-all duration-200 text-sm"
                         title="Edit Metadata"
@@ -155,7 +157,7 @@
 
                     <form action="{{ route('publications.extract', $publication) }}" method="POST" class="inline-flex" onsubmit="return confirmRegeneration(this);">
                         @csrf
-                        <button 
+                        <button
                             type="submit"
                             class="inline-flex items-center gap-2 px-5 py-3 bg-bps-orange hover:bg-orange-600 text-white rounded-2xl font-semibold shadow-lg shadow-orange-500/10 hover:shadow-orange-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                             title="Generate ulang ringkasan dan analisis menggunakan AI"
@@ -173,7 +175,7 @@
     <!-- 9-SECTION AI RESULT DETAILS -->
     @php
         $aiResult = $publication->aiResult;
-        
+
         // Normalization / Fallback for existing publications
         $summary = $aiResult ? $aiResult->summary : $publication->summary;
         $topics = $aiResult ? $aiResult->topics : $publication->topics;
@@ -262,7 +264,7 @@
                         $trendText = 'Menurun';
                         $trendIcon = '📉';
                     }
-                    
+
                     $indicatorName = preg_replace('/\s*(meningkat|naik|tumbuh|bertambah|tinggi|menurun|turun|menyusut|berkurang|rendah|stabil)\b/i', '', $tr);
                     $normalizedTrends[] = [
                         'indicator' => trim($indicatorName),
@@ -288,7 +290,7 @@
     @endphp
 
     <div class="w-full space-y-6">
-        
+
         <!-- Row 1: 1. Ringkasan Publikasi (Full Width) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
             <h3 class="heading-font text-lg font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -308,7 +310,7 @@
 
         <!-- Row 2: 2. Informasi Publikasi & 3. Topik & 4. Kata Kunci (Side-by-Side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             <!-- Left: 2. Informasi Publikasi -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4 flex flex-col justify-between">
                 <div class="space-y-4">
@@ -412,7 +414,7 @@
 
         <!-- Row 4: 6. Indikator Utama & 7. Tren Utama (Side-by-Side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             <!-- Left: 6. Indikator Utama -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
                 <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -479,7 +481,7 @@
 
         <!-- Row 5: 8. Lokasi Pembahasan & 9. Kesimpulan (Side-by-Side) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             <!-- Left: 8. Lokasi Pembahasan -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 space-y-4">
                 <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-50 pb-3">
@@ -527,17 +529,16 @@
 </div>
 
 <!-- Initialize Lucide Icons & PDF.js Cover Rendering -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
 
         // PDF.js Document Loading (Single pass for thumbnail cover + text extraction)
-        const pdfUrl = '/storage/{{ $publication->pdf_path }}';
+        const pdfUrl = @json(Storage::url($publication->pdf_path));
         const canvas = document.getElementById('pdf-cover-canvas');
         const placeholder = document.getElementById('pdf-cover-placeholder');
 
-        if (pdfUrl) {
+        if (pdfUrl && window.pdfjsLib) {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
             const loadingTask = pdfjsLib.getDocument(pdfUrl);
@@ -604,7 +605,7 @@
                                     }
 
                                     // Get human readable file size
-                                    const bytes = {{ file_exists(storage_path('app/public/' . $publication->pdf_path)) ? filesize(storage_path('app/public/' . $publication->pdf_path)) : 0 }};
+                                    const bytes = {{ file_exists(Storage::disk('public')->path($publication->pdf_path)) ? filesize(Storage::disk('public')->path($publication->pdf_path)) : 0 }};
                                     let fileSizeStr = bytes + ' B';
                                     if (bytes >= 1048576) {
                                         fileSizeStr = (bytes / 1048576).toFixed(2) + ' MB';
@@ -671,4 +672,5 @@
         return false;
     }
 </script>
+</div>
 @endsection
