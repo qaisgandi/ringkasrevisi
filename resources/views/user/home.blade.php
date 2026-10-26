@@ -32,6 +32,7 @@
             <input id="catalog-search" class="rk-input" name="search" value="{{ request('search') }}" placeholder="Cari judul, kategori, tahun, atau wilayah">
             <button type="submit" class="rk-btn"><i data-lucide="search" aria-hidden="true"></i>Cari</button>
         </form>
+        <div class="rk-catalog-glance" aria-label="Ringkasan katalog"><span><i data-lucide="library" aria-hidden="true"></i><strong>{{ $totalAllPublications }}</strong><small>publikasi tersedia</small></span><span><i data-lucide="folders" aria-hidden="true"></i><strong>{{ count($officialCategories) }}</strong><small>kategori</small></span><span><i data-lucide="file-search-2" aria-hidden="true"></i><small>Cari menurut judul, tahun, atau wilayah</small></span></div>
     </div></section>
 
     <!-- CONTENT WRAPPER -->
@@ -288,7 +289,7 @@
                         }
                     @endphp
 
-                    <div class="bg-white rounded-3xl border border-slate-100/80 p-5 md:p-6 shadow-sm flex flex-col sm:flex-row gap-5 hover:shadow-md hover:border-slate-200/60 transition-all duration-300 relative group">
+                    <div class="bg-white rounded-3xl border border-slate-100/80 p-5 md:p-6 shadow-sm flex flex-col sm:flex-row gap-5 hover:shadow-md hover:border-slate-200/60 transition-all duration-300 relative group rk-publication-card">
 
                         <!-- Left: Dynamic Book Cover (PDF Canvas OR CSS Fallback) -->
                         <a href="{{ route('user.publications.show', $pub->id) }}" class="shrink-0 flex items-center justify-center cursor-pointer">

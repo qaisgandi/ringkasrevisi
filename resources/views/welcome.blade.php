@@ -21,6 +21,7 @@
 <p class="rk-lead">Dari publikasi yang panjang, temukan informasi yang Anda butuhkan. RINGKAS membantu Anda membaca ringkasan terstruktur dan menelusuri kembali dokumen sumber.</p>
 <div class="rk-actions"><a href="{{ route('login') }}" class="rk-btn">Jelajahi publikasi <i data-lucide="arrow-right" aria-hidden="true"></i></a><a href="#contoh-hasil" class="rk-btn rk-btn-secondary">Lihat contoh hasil</a></div>
 <p class="rk-hero-note">Masuk untuk mengakses katalog, ringkasan, dan asisten tanya jawab.</p>
+<div class="rk-hero-points" aria-label="Fitur utama RINGKAS"><span><i data-lucide="search" aria-hidden="true"></i>Telusuri publikasi</span><span><i data-lucide="sparkles" aria-hidden="true"></i>Baca ringkasan</span><span><i data-lucide="messages-square" aria-hidden="true"></i>Tanya dalam konteks</span></div>
 <div class="rk-demo" aria-label="Demonstrasi dokumen dan ringkasan">
 <div class="rk-demo-toolbar"><strong>RINGKAS / Ruang baca</strong><span>Ilustrasi antarmuka · bukan data statistik resmi</span></div>
 <div class="rk-demo-grid"><div class="rk-demo-source"><article class="rk-paper">
