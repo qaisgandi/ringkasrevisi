@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->report(function (\Throwable $exception): void {
+        $exceptions->report(function (\Throwable $exception) {
             // Keep production diagnostics useful without logging request data or credentials.
             $context = ['exception' => $exception::class];
 
@@ -38,6 +38,10 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             \Illuminate\Support\Facades\Log::error('Application request failed', $context);
+
+            // Avoid a large stack trace in serverless logs; the exception is already
+            // captured above with the safe metadata needed to diagnose it.
+            return app()->environment('production') ? false : null;
         });
 
         $exceptions->shouldRenderJsonWhen(
