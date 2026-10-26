@@ -264,3 +264,29 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}body{color:var(--rk-ink);fon
 .rk-public .rk-final-cta>.rk-wrap::before{content:"";position:absolute;z-index:-1;top:-20px;right:8%;width:180px;height:105px;border:1px solid rgba(215,232,248,.12);border-radius:50%;box-shadow:0 0 0 14px rgba(215,232,248,.035),0 0 0 29px rgba(215,232,248,.025);pointer-events:none}
 .rk-public .rk-final-cta>.rk-wrap::after{content:"";position:absolute;z-index:-1;top:6px;right:13%;width:54px;height:54px;border:1px solid rgba(231,169,82,.28);border-radius:15px;transform:rotate(18deg);pointer-events:none}
 @media(max-width:767px){.rk-public .rk-hero-kicker::after{width:18px}.rk-public .rk-steps li::after{width:54px;height:54px;top:-21px;right:-20px}.rk-public .rk-final-cta>.rk-wrap::before{right:0;width:110px;height:72px}.rk-public .rk-final-cta>.rk-wrap::after{right:16%;width:38px;height:38px}}
+
+/* Layered data-inspired backgrounds for the public landing page. */
+.rk-public .rk-hero{background-image:radial-gradient(ellipse 600px 400px at 7% 12%,rgba(37,99,235,.19),transparent 74%),radial-gradient(ellipse 490px 360px at 94% 19%,rgba(32,159,153,.14),transparent 72%),repeating-linear-gradient(135deg,transparent 0 74px,rgba(42,93,145,.022) 75px,transparent 76px),linear-gradient(180deg,#edf4fc 0%,#f7f9fc 62%,#fff 100%)}
+.rk-public .rk-hero .rk-wrap{position:relative;isolation:isolate}
+.rk-public .rk-hero .rk-wrap::before{content:"";position:absolute;z-index:-1;top:22px;right:-38px;width:min(32vw,360px);height:220px;background-image:radial-gradient(circle,rgba(44,101,155,.2) 1px,transparent 1.35px);background-size:15px 15px;mask-image:radial-gradient(ellipse at 65% 40%,#000 0%,transparent 72%);opacity:.55;pointer-events:none}
+.rk-public .rk-section{position:relative;isolation:isolate;overflow:hidden;border-bottom-color:#e1e8ef}
+.rk-public .rk-section>.rk-wrap{position:relative;z-index:1}
+.rk-public .rk-section#cara-kerja{background:radial-gradient(ellipse 580px 360px at 4% 0%,rgba(52,125,186,.12),transparent 75%),radial-gradient(ellipse 580px 400px at 94% 94%,rgba(29,151,142,.1),transparent 72%),linear-gradient(120deg,#eff5fb,#f8fafc 55%,#f0f8f7)}
+.rk-public .rk-section#cara-kerja::before,.rk-public .rk-section#fitur::before,.rk-public .rk-section#kategori-publikasi::before,.rk-public .rk-section#contoh-hasil::before,.rk-public .rk-section#tentang::before{content:"";position:absolute;z-index:0;width:390px;height:300px;background-image:radial-gradient(circle,rgba(42,97,149,.19) 1px,transparent 1.4px);background-size:16px 16px;mask-image:radial-gradient(ellipse at center,#000 0%,transparent 72%);opacity:.44;pointer-events:none}
+.rk-public .rk-section#cara-kerja::before{right:-105px;top:-85px}
+.rk-public .rk-section#cara-kerja::after,.rk-public .rk-section#fitur::after,.rk-public .rk-section#kategori-publikasi::after,.rk-public .rk-section#contoh-hasil::after,.rk-public .rk-section#tentang::after{content:"";position:absolute;z-index:0;width:300px;height:300px;border:1px solid rgba(52,111,164,.11);border-radius:50%;box-shadow:0 0 0 24px rgba(52,111,164,.022),0 0 0 50px rgba(52,111,164,.017);pointer-events:none}
+.rk-public .rk-section#cara-kerja::after{left:-190px;bottom:-220px}
+.rk-public .rk-section#fitur{background:radial-gradient(ellipse 500px 400px at 89% 15%,rgba(37,99,235,.12),transparent 72%),linear-gradient(125deg,#f5f9fc,#fff 48%,#eff7f6)}
+.rk-public .rk-section#fitur::before{left:-105px;bottom:-100px;background-image:radial-gradient(circle,rgba(29,151,142,.2) 1px,transparent 1.4px)}
+.rk-public .rk-section#fitur::after{right:-200px;top:-195px;border-color:rgba(32,137,142,.13);box-shadow:0 0 0 24px rgba(32,137,142,.025),0 0 0 50px rgba(32,137,142,.018)}
+.rk-public .rk-section#kategori-publikasi{background:radial-gradient(ellipse 520px 320px at 3% 10%,rgba(37,99,235,.1),transparent 72%),linear-gradient(115deg,#f1f6fb,#f8fafc 55%,#eef6f5)}
+.rk-public .rk-section#kategori-publikasi::before{right:-125px;top:-80px}
+.rk-public .rk-section#kategori-publikasi::after{left:-205px;bottom:-215px;width:280px;height:280px}
+.rk-public .rk-section#contoh-hasil{background:radial-gradient(ellipse 520px 360px at 94% 8%,rgba(221,164,79,.11),transparent 75%),linear-gradient(135deg,#f2f6fa,#f8fafc 52%,#f5f8fb)}
+.rk-public .rk-section#contoh-hasil::before{left:-120px;top:-90px;background-image:radial-gradient(circle,rgba(212,154,68,.2) 1px,transparent 1.4px)}
+.rk-public .rk-section#contoh-hasil::after{right:-200px;bottom:-205px;border-color:rgba(208,151,65,.13);box-shadow:0 0 0 24px rgba(208,151,65,.025),0 0 0 50px rgba(208,151,65,.018)}
+.rk-public .rk-section#tentang{background:radial-gradient(ellipse 580px 380px at 3% 0%,rgba(37,99,235,.1),transparent 74%),radial-gradient(ellipse 520px 340px at 95% 100%,rgba(42,157,142,.1),transparent 74%),#f6f9fb}
+.rk-public .rk-section#tentang::before{right:-105px;top:-100px;background-image:radial-gradient(circle,rgba(42,97,149,.19) 1px,transparent 1.4px)}
+.rk-public .rk-section#tentang::after{left:-210px;bottom:-220px;border-color:rgba(45,132,151,.12);box-shadow:0 0 0 24px rgba(45,132,151,.023),0 0 0 50px rgba(45,132,151,.016)}
+.rk-public .rk-section#cara-kerja .rk-steps li,.rk-public .rk-section#kategori-publikasi .grid>a,.rk-public .rk-section#contoh-hasil .rk-comparison{background-color:rgba(255,255,255,.92)}
+@media(max-width:767px){.rk-public .rk-hero .rk-wrap::before{top:auto;bottom:4px;right:-16px;width:175px;height:115px;background-size:12px 12px;opacity:.42}.rk-public .rk-section#cara-kerja::before,.rk-public .rk-section#fitur::before,.rk-public .rk-section#kategori-publikasi::before,.rk-public .rk-section#contoh-hasil::before,.rk-public .rk-section#tentang::before{width:220px;height:190px;opacity:.32}.rk-public .rk-section#cara-kerja::after,.rk-public .rk-section#fitur::after,.rk-public .rk-section#kategori-publikasi::after,.rk-public .rk-section#contoh-hasil::after,.rk-public .rk-section#tentang::after{width:190px;height:190px}}
