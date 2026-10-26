@@ -20,3 +20,8 @@ html{scroll-behavior:smooth;scroll-padding-top:96px}body{color:var(--rk-ink);fon
 .rk-app main [class~="text-[10px]"],.rk-app main [class~="text-[11px]"]{font-size:12px}.rk-app :is(input,select,textarea):focus-visible{outline:2px solid #2563eb;outline-offset:2px}.rk-app main a,.rk-app main button{scroll-margin:100px}.rk-public [role=dialog],.rk-app [role=dialog]{line-height:1.7}.rk-public [role=dialog]>div,.rk-app [role=dialog]>div{border-radius:10px}
 
 .rk-admin #sidebar nav a[aria-current=page]{background:#284a6e;border-left:3px solid #8bb6ef}.rk-admin #sidebar nav>div{margin:8px 0 4px;padding-top:12px;color:#a8bad0;font-size:11px}.rk-admin footer.text-slate-400,.rk-admin footer,.rk-admin footer .text-slate-400,.rk-admin footer .text-slate-500,.rk-admin footer button{color:#475569}.rk-admin #sidebar nav a{padding-block:10px}.rk-admin main [class*="min-h-[350px]"]{min-height:300px}
+
+/* Subtle icon accents on the public landing page. */
+.rk-hero-kicker{display:inline-flex;align-items:center;gap:8px}.rk-hero-kicker svg{width:16px;height:16px;color:#326094}
+.rk-step-marker{display:inline-flex;align-items:center;gap:9px}.rk-step-marker>svg{width:16px;height:16px;color:#326094}.rk-step-number{line-height:1}
+.rk-comparison h3{display:flex;align-items:center;gap:9px}.rk-comparison h3 svg{width:18px;height:18px;color:#326094}

@@ -16,7 +16,7 @@
 </div></header>
 <main id="konten">
 <section class="rk-hero" id="beranda"><div class="rk-wrap">
-<p class="rk-kicker">Ruang baca publikasi statistik BPS</p>
+<p class="rk-kicker rk-hero-kicker"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>Ruang baca publikasi statistik BPS</p>
 <h1>Pahami data statistik,<br><em>lebih cepat dan lebih mudah.</em></h1>
 <p class="rk-lead">Dari publikasi yang panjang, temukan informasi yang Anda butuhkan. RINGKAS membantu Anda membaca ringkasan terstruktur dan menelusuri kembali dokumen sumber.</p>
 <div class="rk-actions"><a href="{{ route('login') }}" class="rk-btn">Jelajahi publikasi <i data-lucide="arrow-right" aria-hidden="true"></i></a><a href="#contoh-hasil" class="rk-btn rk-btn-secondary">Lihat contoh hasil</a></div>
@@ -32,10 +32,10 @@
 </article></div></div></div></section>
 <section class="rk-section" id="cara-kerja"><div class="rk-wrap"><div class="rk-section-heading"><div><p class="rk-kicker">01 / Cara kerja</p><h2>Dari mencari referensi<br>hingga memahami isinya.</h2></div><p>Administrator menyiapkan publikasi dan memproses ringkasannya. Anda dapat menjelajahi dokumen yang tersedia melalui akun RINGKAS.</p></div>
 <ol class="rk-steps">
-<li><span class="rk-step-number">01</span><h3>Masuk ke RINGKAS</h3><p>Gunakan akun Anda atau daftar untuk mengakses katalog publikasi.</p></li>
-<li><span class="rk-step-number">02</span><h3>Temukan publikasi</h3><p>Cari judul, tahun, wilayah, atau kategori yang sesuai dengan kebutuhan Anda.</p></li>
-<li><span class="rk-step-number">03</span><h3>Baca ringkasannya</h3><p>Pelajari ikhtisar, topik, serta indikator pada publikasi yang sudah diproses.</p></li>
-<li><span class="rk-step-number">04</span><h3>Telusuri lebih jauh</h3><p>Tanyakan isi publikasi kepada asisten AI dan periksa kembali dokumen PDF sumber.</p></li>
+<li><span class="rk-step-marker"><i data-lucide="log-in" aria-hidden="true"></i><span class="rk-step-number">01</span></span><h3>Masuk ke RINGKAS</h3><p>Gunakan akun Anda atau daftar untuk mengakses katalog publikasi.</p></li>
+<li><span class="rk-step-marker"><i data-lucide="search" aria-hidden="true"></i><span class="rk-step-number">02</span></span><h3>Temukan publikasi</h3><p>Cari judul, tahun, wilayah, atau kategori yang sesuai dengan kebutuhan Anda.</p></li>
+<li><span class="rk-step-marker"><i data-lucide="align-left" aria-hidden="true"></i><span class="rk-step-number">03</span></span><h3>Baca ringkasannya</h3><p>Pelajari ikhtisar, topik, serta indikator pada publikasi yang sudah diproses.</p></li>
+<li><span class="rk-step-marker"><i data-lucide="external-link" aria-hidden="true"></i><span class="rk-step-number">04</span></span><h3>Telusuri lebih jauh</h3><p>Tanyakan isi publikasi kepada asisten AI dan periksa kembali dokumen PDF sumber.</p></li>
 </ol></div></section>
 <section class="rk-section" id="fitur"><div class="rk-wrap rk-features"><div><p class="rk-kicker">02 / Fitur RINGKAS</p><h2>Lebih dekat dengan data.<br>Lebih jelas konteksnya.</h2><p class="rk-muted" style="margin-top:24px;font-size:15px;line-height:1.8">Untuk mahasiswa, peneliti, dan siapa pun yang ingin memahami publikasi statistik.</p></div><div class="rk-feature-list">
 <article><i data-lucide="file-text" aria-hidden="true"></i><div><h3>Ringkasan yang terstruktur</h3><p>Ikhtisar, pokok pembahasan, kata kunci, dan kesimpulan membantu Anda menavigasi isi publikasi.</p></div></article>
@@ -53,7 +53,7 @@
 @endforeach
 </div></div></section>
 <section class="rk-section rk-example" id="contoh-hasil"><div class="rk-wrap"><div class="rk-section-heading"><div><p class="rk-kicker">03 / Contoh hasil</p><h2>Baca gambaran besarnya.<br>Tetap dekat dengan sumber.</h2></div><p>Berikut ilustrasi cara informasi ditata ulang. Contoh ini menjelaskan format, tanpa menyajikan angka atau temuan sebagai data resmi.</p></div>
-<div class="rk-comparison"><div><h3>Dokumen publikasi</h3><p>Publikasi statistik dapat memuat penjelasan konsep, metodologi, tabel, dan uraian per topik. Pembaca perlu memahami cakupan wilayah, periode, serta definisi indikator agar tidak keliru menafsirkan data.</p><p style="margin-top:18px">Dokumen asli menjadi rujukan untuk memeriksa angka, satuan, dan catatan yang menyertai setiap tabel.</p></div><div><h3>Susunan hasil ringkasan</h3><dl><dt>Ikhtisar</dt><dd>Gambaran isi dan cakupan publikasi.</dd><dt>Temuan utama</dt><dd>Poin penting dari hasil analisis dokumen.</dd><dt>Indikator</dt><dd>Informasi indikator yang ditemukan dalam publikasi.</dd><dt>Rujukan</dt><dd>Lokasi pembahasan apabila tersedia dalam hasil analisis.</dd></dl></div></div>
+<div class="rk-comparison"><div><h3><i data-lucide="file-text" aria-hidden="true"></i>Dokumen publikasi</h3><p>Publikasi statistik dapat memuat penjelasan konsep, metodologi, tabel, dan uraian per topik. Pembaca perlu memahami cakupan wilayah, periode, serta definisi indikator agar tidak keliru menafsirkan data.</p><p style="margin-top:18px">Dokumen asli menjadi rujukan untuk memeriksa angka, satuan, dan catatan yang menyertai setiap tabel.</p></div><div><h3><i data-lucide="list-checks" aria-hidden="true"></i>Susunan hasil ringkasan</h3><dl><dt>Ikhtisar</dt><dd>Gambaran isi dan cakupan publikasi.</dd><dt>Temuan utama</dt><dd>Poin penting dari hasil analisis dokumen.</dd><dt>Indikator</dt><dd>Informasi indikator yang ditemukan dalam publikasi.</dd><dt>Rujukan</dt><dd>Lokasi pembahasan apabila tersedia dalam hasil analisis.</dd></dl></div></div>
 <p class="rk-form-note" style="margin-top:18px">Hasil AI dapat mengandung kekeliruan. Gunakan publikasi asli sebagai rujukan utama.</p></div></section>
 <section class="rk-section" id="tentang"><div class="rk-wrap rk-about"><div><p class="rk-kicker">04 / Tentang RINGKAS</p><h2>Statistik yang lebih<br>mudah didekati.</h2></div><div><p>RINGKAS adalah sistem ringkasan publikasi statistik BPS yang membantu pembaca memahami dokumen melalui pemrosesan teks dan kecerdasan buatan.</p><p>Ringkasan berfungsi sebagai pintu masuk untuk eksplorasi. Konteks, metodologi, dan rincian dalam publikasi asli tetap menjadi bagian penting dari proses membaca data.</p><a href="https://www.bps.go.id" class="rk-link" target="_blank" rel="noopener noreferrer">Kunjungi portal resmi BPS ↗</a></div></div></section>
 <section class="rk-final-cta"><div class="rk-wrap"><div><h2>Mulai dari satu publikasi.</h2><p>Temukan referensi yang relevan, lalu pelajari informasi di dalamnya.</p></div><a href="{{ route('register') }}" class="rk-btn">Buat akun RINGKAS <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></section>
