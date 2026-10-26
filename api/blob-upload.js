@@ -35,7 +35,11 @@ export default async function handler(request, response) {
 
     try {
         const body = request.body ?? {};
-        if (!verifyAdminUploadToken(body.clientPayload)) {
+        // @vercel/blob/client sends the authorization inside its event payload:
+        // { type: "blob.generate-client-token", payload: { clientPayload } }.
+        // Validate that value before handing the event to handleUpload.
+        const clientPayload = body.payload?.clientPayload ?? body.clientPayload;
+        if (!verifyAdminUploadToken(clientPayload)) {
             return response.status(403).json({ error: 'Upload authorization expired or invalid' });
         }
 
