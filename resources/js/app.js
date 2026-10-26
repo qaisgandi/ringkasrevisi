@@ -1,3 +1,7 @@
+import DOMPurify from 'dompurify';
+import { upload as uploadToVercelBlob } from '@vercel/blob/client';
+window.DOMPurify = DOMPurify;
+
 // Consolidated script for BPS Ringkasan application
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-publication-upload]').forEach(form => {
@@ -46,7 +50,62 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        form.addEventListener('submit', event => {
+        form.addEventListener('submit', async event => {
+            const file = input.files?.[0];
+            if (form.dataset.blobUploadUrl && file && form.dataset.blobUploadComplete !== 'true') {
+                event.preventDefault();
+                const submitButton = form.querySelector('button[type="submit"]');
+                const progress = form.querySelector('[data-upload-progress]');
+                const progressBar = progress?.querySelector('progress');
+                const status = form.querySelector('[data-upload-status]');
+                const error = form.querySelector('[data-file-error]');
+                const blobUrlInput = form.querySelector('[name="pdf_blob_url"]');
+                const fileSizeInput = form.querySelector('[name="uploaded_file_size"]');
+                const csrfToken = form.querySelector('input[name="_token"]')?.value;
+
+                if (error) { error.hidden = true; error.textContent = ''; }
+                if (submitButton) { submitButton.disabled = true; submitButton.dataset.uploading = 'true'; }
+                if (progress) progress.hidden = false;
+                if (status) status.textContent = 'Mengirim dokumen langsung ke penyimpanan aman…';
+
+                try {
+                    const tokenResponse = await fetch(form.dataset.uploadTokenUrl, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        body: '{}',
+                    });
+                    const tokenData = await tokenResponse.json();
+                    if (!tokenResponse.ok || !tokenData.token) throw new Error(tokenData.message || 'Otorisasi unggah gagal. Muat ulang halaman dan coba lagi.');
+
+                    const blob = await uploadToVercelBlob(`publications/${crypto.randomUUID()}.pdf`, file, {
+                        access: 'public',
+                        contentType: 'application/pdf',
+                        handleUploadUrl: form.dataset.blobUploadUrl,
+                        clientPayload: tokenData.token,
+                        onUploadProgress: ({ percentage }) => {
+                            if (progressBar) progressBar.value = percentage;
+                            if (status) status.textContent = `Mengunggah dokumen… ${Math.round(percentage)}%`;
+                        },
+                    });
+
+                    blobUrlInput.value = blob.url;
+                    fileSizeInput.value = String(file.size);
+                    form.dataset.blobUploadComplete = 'true';
+                    input.disabled = true;
+                    if (status) status.textContent = 'Dokumen tersimpan. Menyimpan data publikasi…';
+                    form.requestSubmit(submitButton || undefined);
+                } catch (uploadError) {
+                    console.error('Publication upload failed:', uploadError);
+                    if (error) {
+                        error.textContent = uploadError.message || 'Unggahan gagal. Periksa koneksi lalu coba kembali.';
+                        error.hidden = false;
+                    }
+                    if (progress) progress.hidden = true;
+                    if (submitButton) { submitButton.disabled = false; delete submitButton.dataset.uploading; }
+                }
+                return;
+            }
+
             const message = validateFile(input.files?.[0]);
             input.setCustomValidity(message);
             if (message) {

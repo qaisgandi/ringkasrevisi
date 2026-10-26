@@ -235,4 +235,40 @@ class UserAuthController extends Controller
             'publication' => $publication,
         ]);
     }
+
+    /** Unduh PDF publikasi dan catat event unduhan untuk dashboard admin. */
+    public function downloadPublication(Request $request, Publication $publication)
+    {
+        $fileService = app(\App\Services\PublicationFileService::class);
+        $isBlob = $fileService->isTrustedBlobUrl((string) $publication->pdf_path);
+        abort_unless($isBlob || preg_match('/\Apublications\/[a-zA-Z0-9_.-]+\.pdf\z/i', (string) $publication->pdf_path), 404);
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        if (!$isBlob && !$disk->exists($publication->pdf_path)) {
+            return back()->with('error', 'Berkas PDF tidak ditemukan.');
+        }
+
+        try {
+            $geo = app(\App\Services\IpGeolocationService::class)->locate($request->ip());
+            \App\Models\VisitLog::create([
+                'user_id' => Auth::id(),
+                'publication_id' => $publication->id,
+                'event_type' => 'download',
+                'ip_address' => $request->ip(),
+                'region' => $geo['region'] ?? 'Tidak diketahui',
+                'city' => $geo['city'] ?? null,
+                'user_agent' => substr((string) $request->userAgent(), 0, 500),
+                'url' => substr('/' . ltrim($request->path(), '/'), 0, 500),
+            ]);
+        } catch (\Throwable $e) {
+            // Kegagalan pencatatan tidak boleh memblokir unduhan.
+        }
+
+        $filename = \Illuminate\Support\Str::slug(substr($publication->title, 0, 60)) . '.pdf';
+
+        if ($isBlob) {
+            return redirect()->away($publication->pdf_path);
+        }
+
+        return $disk->download($publication->pdf_path, $filename);
+    }
 }

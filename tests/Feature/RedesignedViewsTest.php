@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Publication;
 use App\Models\User;
+use App\Models\VisitLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RedesignedViewsTest extends TestCase
@@ -68,6 +71,7 @@ class RedesignedViewsTest extends TestCase
         ]);
         $this->get('/admin/users/' . $managedUser->id . '/edit')->assertOk();
         $this->actingAs($managedUser)->get('/profile')->assertOk();
+        $this->get('/home')->assertSee('bpsChatbotRoot')->assertSee('Tanya BPS AI');
     }
 
     public function test_redesigned_authentication_pages_render_for_guests(): void
@@ -75,5 +79,115 @@ class RedesignedViewsTest extends TestCase
         $this->get('/login')->assertOk()->assertSee('Masuk');
         $this->get('/register')->assertOk()->assertSee('Buat akun');
         $this->get('/admin/login')->assertOk()->assertSee('Masuk');
+    }
+
+    public function test_user_page_visits_and_pdf_downloads_are_counted_for_admin_statistics(): void
+    {
+        $user = User::create([
+            'name' => 'User Statistik',
+            'username' => 'user-statistik',
+            'email' => 'user-statistik@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'user',
+        ]);
+        $publication = Publication::create([
+            'title' => 'Dokumen Statistik',
+            'category' => 'Publikasi Umum',
+            'year' => 2026,
+            'release_date' => '2026-01-01',
+            'pdf_path' => 'publications/dokumen-statistik.pdf',
+            'summary' => 'Ringkasan uji statistik.',
+            'status' => 'Selesai',
+        ]);
+
+        Storage::disk('public')->put($publication->pdf_path, '%PDF-test');
+
+        $this->actingAs($user)
+            ->get('/publications/' . $publication->id)
+            ->assertOk();
+        $this->get('/publications/' . $publication->id)->assertOk();
+        $this->get('/publications/' . $publication->id . '/download')
+            ->assertDownload('dokumen-statistik.pdf');
+
+        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'A page is counted once per session.');
+        $this->assertSame(1, VisitLog::where('event_type', 'download')->count());
+    }
+
+    public function test_chatbot_routes_return_suggestions_and_a_safe_fallback_without_an_api_key(): void
+    {
+        $user = User::create([
+            'name' => 'User Chatbot',
+            'username' => 'user-chatbot',
+            'email' => 'user-chatbot@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'user',
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/chatbot/suggestions')
+            ->assertOk()
+            ->assertJsonPath('mode', 'universal');
+
+        $this->postJson('/chatbot/send', ['message' => 'Cari publikasi tentang IPM'])
+            ->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonStructure(['reply', 'mode']);
+    }
+
+    public function test_admin_can_upload_a_pdf_through_the_original_upload_flow(): void
+    {
+        Storage::fake('public');
+        $admin = User::create([
+            'name' => 'Admin Unggah',
+            'username' => 'admin-unggah',
+            'email' => 'admin-unggah@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->post('/admin/publications', [
+            'title' => 'Publikasi Upload Test',
+            'category' => 'Publikasi Umum',
+            'release_date' => '2026-10-26',
+            'pdf' => UploadedFile::fake()->createWithContent('upload-test.pdf', '%PDF-1.4 test'),
+        ]);
+
+        $response->assertRedirect(route('publications.index'));
+        $this->assertDatabaseHas('publications', ['title' => 'Publikasi Upload Test']);
+        Storage::disk('public')->assertExists(Publication::where('title', 'Publikasi Upload Test')->value('pdf_path'));
+    }
+
+    public function test_admin_blob_upload_metadata_is_persisted_and_blob_urls_are_restricted(): void
+    {
+        config(['services.vercel_blob.enabled' => true]);
+        $admin = User::create([
+            'name' => 'Admin Blob',
+            'username' => 'admin-blob',
+            'email' => 'admin-blob@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'admin',
+        ]);
+
+        $response = $this->actingAs($admin)->post('/admin/publications', [
+            'title' => 'Publikasi Blob Test',
+            'category' => 'Publikasi Umum',
+            'release_date' => '2026-10-26',
+            'pdf_blob_url' => 'https://example.public.blob.vercel-storage.com/publications/test.pdf',
+            'uploaded_file_size' => 1024,
+        ]);
+
+        $response->assertRedirect(route('publications.index'));
+        $this->assertDatabaseHas('publications', [
+            'title' => 'Publikasi Blob Test',
+            'pdf_path' => 'https://example.public.blob.vercel-storage.com/publications/test.pdf',
+        ]);
+
+        $this->from('/admin/publications/create')->post('/admin/publications', [
+            'title' => 'Publikasi Blob Tidak Valid',
+            'category' => 'Publikasi Umum',
+            'release_date' => '2026-10-26',
+            'pdf_blob_url' => 'https://attacker.example/publications/evil.pdf',
+            'uploaded_file_size' => 1024,
+        ])->assertRedirect('/admin/publications/create')->assertSessionHasErrors('pdf');
     }
 }

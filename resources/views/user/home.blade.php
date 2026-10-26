@@ -294,7 +294,7 @@
                         <a href="{{ route('user.publications.show', $pub->id) }}" class="shrink-0 flex items-center justify-center cursor-pointer">
                             <div class="relative w-28 h-36 shrink-0 rounded-xl shadow-md overflow-hidden border border-slate-100 bg-slate-50 select-none group-hover:scale-[1.02] transition-transform duration-300">
                                 <!-- PDF Canvas Cover (rendered via PDF.js) -->
-                                <canvas id="pdf-cover-canvas-{{ $pub->id }}" class="w-full h-full object-contain hidden rounded-xl" data-pdf-url="{{ $pub->pdf_path ? Storage::url($pub->pdf_path) : '' }}"></canvas>
+                                <canvas id="pdf-cover-canvas-{{ $pub->id }}" class="w-full h-full object-contain hidden rounded-xl" data-pdf-url="{{ $pub->pdf_url }}"></canvas>
 
                                 <!-- CSS Fallback Placeholder (shown while loading or if PDF.js fails) -->
                                 <div id="pdf-cover-placeholder-{{ $pub->id }}" class="relative w-full h-full bg-gradient-to-br {{ $coverGradient }} text-white p-3 flex flex-col justify-between border-r-3 border-black/10 overflow-hidden">
@@ -365,8 +365,7 @@
 
                                 @if ($pub->pdf_path)
                                     <a
-                                        href="{{ Storage::url($pub->pdf_path) }}"
-                                        download
+                                        href="{{ route('user.publications.download', $pub->id) }}"
                                         class="px-4 py-2 bg-bps-lightBlue hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
                                         title="Unduh Berkas PDF Asli"
                                     >
@@ -421,7 +420,7 @@
                     (function() {
                         const canvas = document.getElementById('pdf-cover-canvas-{{ $pub->id }}');
                         const placeholder = document.getElementById('pdf-cover-placeholder-{{ $pub->id }}');
-                        const pdfUrl = '{{ Storage::url($pub->pdf_path) }}';
+                        const pdfUrl = @json($pub->pdf_url);
 
                         if (canvas && pdfUrl && window.pdfjsLib) {
                             pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {

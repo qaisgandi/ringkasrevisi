@@ -252,8 +252,7 @@
                     <!-- PDF Download Button -->
                     @if ($publication->pdf_path)
                         <a
-                            href="{{ Storage::url($publication->pdf_path) }}"
-                            download
+                            href="{{ route('user.publications.download', $publication->id) }}"
                             class="w-full py-3 bg-bps-lightBlue hover:bg-blue-700 text-white rounded-2xl font-bold text-sm shadow-md shadow-blue-500/15 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <i data-lucide="download" class="w-4 h-4"></i>
@@ -542,7 +541,7 @@
             // PDF.js Cover Page Rendering
             const canvas = document.getElementById('pdf-cover-canvas');
             const placeholder = document.getElementById('pdf-cover-placeholder');
-            const pdfUrl = @json(Storage::url($publication->pdf_path));
+            const pdfUrl = @json($publication->pdf_url);
 
             if (pdfUrl && window.pdfjsLib) {
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';

@@ -6,6 +6,7 @@ use App\Models\Publication;
 use App\Models\Notification;
 use App\Http\Requests\StorePublicationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class PublicationController extends Controller
@@ -72,6 +73,23 @@ class PublicationController extends Controller
         ]);
     }
 
+    /** Mint a short-lived authorization for direct browser-to-Blob PDF uploads. */
+    public function uploadToken()
+    {
+        abort_unless(config('services.vercel_blob.enabled'), 503, 'Penyimpanan dokumen belum dikonfigurasi.');
+        abort_unless(Auth::user()?->role === 'admin', 403);
+
+        $claims = rtrim(strtr(base64_encode(json_encode([
+            'uid' => (int) Auth::id(),
+            'role' => 'admin',
+            'exp' => now()->addMinutes(3)->timestamp,
+            'nonce' => bin2hex(random_bytes(16)),
+        ], JSON_THROW_ON_ERROR)), '+/', '-_'), '=');
+        $signature = hash_hmac('sha256', $claims, (string) config('app.key'));
+
+        return response()->json(['token' => $claims . '.' . $signature]);
+    }
+
     /**
      * Memproses penyimpanan berkas PDF publikasi dan metadatanya.
      */
@@ -79,24 +97,30 @@ class PublicationController extends Controller
     {
         @set_time_limit(180);
         try {
-            // Mendapatkan berkas PDF
+            // Berkas besar dikirim langsung ke object storage agar tidak melewati batas body Vercel Functions.
             $file = $request->file('pdf');
-            if (!$file) {
+            $blobUrl = $request->input('pdf_blob_url');
+            if (!$file && !$blobUrl) {
                 return redirect()->back()
                     ->withInput()
                     ->withErrors(['pdf' => 'Gagal mengunggah berkas. Pastikan berkas PDF Anda valid dan ukuran tidak melebihi 25 MB.']);
             }
-            
-            // Membuat nama file yang unik dengan timestamp
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            
-            // Menyimpan file ke storage/app/public/publications
-            $pdfPath = $file->storeAs('publications', $filename, 'public');
 
-            // Ekstraksi jumlah halaman dan ukuran file saat diupload
-            $absolutePath = storage_path('app/public/' . $pdfPath);
-            
-            $fileBytes = @filesize($absolutePath) ?: 0;
+            if ($blobUrl && !app(\App\Services\PublicationFileService::class)->isTrustedBlobUrl($blobUrl)) {
+                return back()->withInput()->withErrors(['pdf' => 'Berkas unggahan tidak berasal dari penyimpanan yang valid.']);
+            }
+
+            if ($blobUrl) {
+                $pdfPath = $blobUrl;
+                $absolutePath = null;
+                $fileBytes = (int) $request->input('uploaded_file_size', 0);
+            } else {
+                $filename = (string) \Illuminate\Support\Str::uuid() . '.pdf';
+                $pdfPath = $file->storeAs('publications', $filename, 'public');
+                $absolutePath = Storage::disk('public')->path($pdfPath);
+                $fileBytes = $file->getSize();
+            }
+
             if ($fileBytes >= 1048576) {
                 $calculatedSize = number_format($fileBytes / 1048576, 2) . ' MB';
             } elseif ($fileBytes >= 1024) {
@@ -105,10 +129,13 @@ class PublicationController extends Controller
                 $calculatedSize = $fileBytes . ' B';
             }
 
-            $fileSize = $request->input('file_size', $calculatedSize);
+            $fileSize = $calculatedSize;
             $pageCount = $request->input('page_count');
             if (empty($pageCount) || !is_numeric($pageCount)) {
                 try {
+                    if (!$absolutePath) {
+                        throw new \RuntimeException('Page count is deferred until document processing.');
+                    }
                     $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
                     $pageCount = $extracted['page_count'] ?? 1;
                 } catch (\Exception $ex) {
@@ -156,7 +183,7 @@ class PublicationController extends Controller
                 
         } catch (\Exception $e) {
             // Hapus file jika terlanjur tersimpan di storage
-            if (isset($pdfPath) && Storage::disk('public')->exists($pdfPath)) {
+            if (isset($pdfPath) && !str_starts_with($pdfPath, 'https://') && Storage::disk('public')->exists($pdfPath)) {
                 Storage::disk('public')->delete($pdfPath);
             }
 
@@ -209,8 +236,12 @@ class PublicationController extends Controller
 
         if (empty($text)) {
             // Jalankan ekstraksi secara manual dari file PDF
-            $absolutePath = storage_path('app/public/' . $publication->pdf_path);
-            $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
+            [$absolutePath, $temporaryPath] = app(\App\Services\PublicationFileService::class)->materialize($publication->pdf_path);
+            try {
+                $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
+            } finally {
+                if ($temporaryPath && is_file($temporaryPath)) @unlink($temporaryPath);
+            }
             $text = $extracted['text'];
             $pages = $extracted['pages'];
             $pageCount = $extracted['page_count'];
@@ -299,7 +330,9 @@ class PublicationController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:Publikasi Umum,Statistik Sosial,Statistik Ekonomi,Statistik Pertanian,Statistik Industri,Statistik Distribusi,Statistik Lingkungan,Sensus & Survei',
             'release_date' => 'required|date',
-            'pdf' => 'nullable|file|mimes:pdf|max:25600', // Opsional, 25MB max
+            'pdf' => 'nullable|file|mimes:pdf|max:25600',
+            'pdf_blob_url' => 'nullable|url|max:500',
+            'uploaded_file_size' => 'nullable|integer|min:1|max:26214400',
         ], [
             'title.required' => 'Judul publikasi wajib diisi.',
             'category.required' => 'Kategori publikasi wajib diisi.',
@@ -322,21 +355,29 @@ class PublicationController extends Controller
         ];
 
         // Jika ada file PDF baru yang diunggah
-        if ($request->hasFile('pdf')) {
+        $blobUrl = $request->input('pdf_blob_url');
+        if ($blobUrl && !app(\App\Services\PublicationFileService::class)->isTrustedBlobUrl($blobUrl)) {
+            return back()->withInput()->withErrors(['pdf' => 'Berkas unggahan tidak berasal dari penyimpanan yang valid.']);
+        }
+
+        if ($request->hasFile('pdf') || $blobUrl) {
             // Hapus file lama jika ada
-            if (Storage::disk('public')->exists($publication->pdf_path)) {
+            if (!str_starts_with((string) $publication->pdf_path, 'https://') && Storage::disk('public')->exists($publication->pdf_path)) {
                 Storage::disk('public')->delete($publication->pdf_path);
             }
 
-            // Simpan file baru
             $file = $request->file('pdf');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $data['pdf_path'] = $file->storeAs('publications', $filename, 'public');
+            if ($blobUrl) {
+                $data['pdf_path'] = $blobUrl;
+                $absolutePath = null;
+                $fileBytes = (int) $request->input('uploaded_file_size', 0);
+            } else {
+                $filename = (string) \Illuminate\Support\Str::uuid() . '.pdf';
+                $data['pdf_path'] = $file->storeAs('publications', $filename, 'public');
+                $absolutePath = Storage::disk('public')->path($data['pdf_path']);
+                $fileBytes = $file->getSize();
+            }
 
-            // Ekstraksi jumlah halaman dan ukuran file saat diupload
-            $absolutePath = storage_path('app/public/' . $data['pdf_path']);
-            
-            $fileBytes = @filesize($absolutePath) ?: 0;
             if ($fileBytes >= 1048576) {
                 $calculatedSize = number_format($fileBytes / 1048576, 2) . ' MB';
             } elseif ($fileBytes >= 1024) {
@@ -345,12 +386,16 @@ class PublicationController extends Controller
                 $calculatedSize = $fileBytes . ' B';
             }
 
-            $fileSize = $request->input('file_size', $calculatedSize);
+            $fileSize = $calculatedSize;
             $pageCount = $request->input('page_count');
             if (empty($pageCount) || !is_numeric($pageCount)) {
                 try {
-                    $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
-                    $pageCount = $extracted['page_count'] ?? 1;
+                    if (!$absolutePath) {
+                        $pageCount = 1;
+                    } else {
+                        $extracted = app(\App\Services\PdfExtractionService::class)->extract($absolutePath);
+                        $pageCount = $extracted['page_count'] ?? 1;
+                    }
                 } catch (\Exception $ex) {
                     $pageCount = 1;
                 }
@@ -532,4 +577,3 @@ class PublicationController extends Controller
         return $this->index($request);
     }
 }
-

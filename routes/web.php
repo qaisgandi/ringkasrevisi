@@ -5,6 +5,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserAuthController;
+use App\Http\Controllers\ChatbotController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,11 +42,14 @@ Route::post('/notifications/read-all', function() {
     return redirect()->back();
 })->name('notifications.read-all');
 
-Route::middleware(['role:user,admin'])->group(function() {
+Route::middleware(['role:user,admin', 'track.visit'])->group(function() {
     Route::get('/home', [UserAuthController::class, 'beranda'])->name('home');
     Route::get('/profile', [UserAuthController::class, 'profile'])->name('profile');
     Route::post('/profile', [UserAuthController::class, 'updateProfile'])->name('profile.update');
     Route::get('/publications/{publication}', [UserAuthController::class, 'showPublication'])->name('user.publications.show');
+    Route::get('/publications/{publication}/download', [UserAuthController::class, 'downloadPublication'])->name('user.publications.download');
+    Route::post('/chatbot/send', [ChatbotController::class, 'sendMessage'])->middleware('throttle:chatbot')->name('chatbot.send');
+    Route::get('/chatbot/suggestions', [ChatbotController::class, 'getSuggestions'])->name('chatbot.suggestions');
 });
 
 // AREA ADMINISTRATOR (Dilindungi role:admin dengan prefix /admin)
@@ -56,6 +60,7 @@ Route::prefix('admin')->middleware(['role:admin'])->group(function() {
     // Pengelolaan Publikasi
     Route::get('/publications', [PublicationController::class, 'index'])->name('publications.index');
     Route::get('/publications/create', [PublicationController::class, 'create'])->name('publications.create');
+    Route::post('/publications/upload-token', [PublicationController::class, 'uploadToken'])->middleware('throttle:10,1')->name('publications.upload-token');
     Route::post('/publications', [PublicationController::class, 'store'])->name('publications.store');
     Route::get('/publications/{publication}', [PublicationController::class, 'show'])->name('publications.show');
     Route::get('/publications/{publication}/edit', [PublicationController::class, 'edit'])->name('publications.edit');

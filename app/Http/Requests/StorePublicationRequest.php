@@ -24,7 +24,9 @@ class StorePublicationRequest extends FormRequest
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:Publikasi Umum,Statistik Sosial,Statistik Ekonomi,Statistik Pertanian,Statistik Industri,Statistik Distribusi,Statistik Lingkungan,Sensus & Survei',
             'release_date' => 'required|date',
-            'pdf' => 'required|file|mimes:pdf|max:25600', // 25600 KB = 25 MB
+            'pdf' => 'required_without:pdf_blob_url|nullable|file|mimes:pdf|max:25600',
+            'pdf_blob_url' => 'required_without:pdf|nullable|url|max:500',
+            'uploaded_file_size' => 'nullable|integer|min:1|max:26214400',
         ];
     }
 
@@ -48,6 +50,7 @@ class StorePublicationRequest extends FormRequest
             'pdf.file' => 'Unggahan harus berupa file berkas.',
             'pdf.mimes' => 'Format berkas harus berupa dokumen .pdf.',
             'pdf.max' => 'Ukuran berkas PDF maksimal 25 MB.',
+            'pdf_blob_url.required_without' => 'Berkas PDF publikasi wajib diunggah.',
         ];
     }
 }

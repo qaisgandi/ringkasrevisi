@@ -86,6 +86,7 @@
     @include('layouts.footer')
 
     <!-- Chatbot Universal AI (Global: Beranda, Profil, Detail Publikasi) -->
+    @include('components.chatbot')
 
     <!-- Initialize Lucide Icons -->
     <script>

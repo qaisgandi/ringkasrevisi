@@ -120,6 +120,51 @@ class LoginController extends Controller
             $monthlyData[$monthLabel] = $count;
         }
 
+        // Statistik pembaca: nilai aman tetap tersedia sebelum tabel log dimigrasikan.
+        $visitStats = [
+            'totalVisits' => 0,
+            'totalDownloads' => 0,
+            'uniqueVisitors' => 0,
+            'visitsByDay' => [],
+            'visitsByRegion' => [],
+            'topPublications' => collect(),
+            'recentVisits' => collect(),
+        ];
+
+        try {
+            $visitStats['totalVisits'] = \App\Models\VisitLog::where('event_type', 'view')->count();
+            $visitStats['totalDownloads'] = \App\Models\VisitLog::where('event_type', 'download')->count();
+            $visitStats['uniqueVisitors'] = \App\Models\VisitLog::whereNotNull('ip_address')
+                ->distinct()->count('ip_address');
+
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i);
+                $visitStats['visitsByDay'][$date->format('d M')] = \App\Models\VisitLog::where('event_type', 'view')
+                    ->whereDate('created_at', $date->toDateString())->count();
+            }
+
+            $visitStats['visitsByRegion'] = \App\Models\VisitLog::selectRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui') as region, COUNT(*) as total")
+                ->where('event_type', 'view')
+                ->groupByRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui')")
+                ->orderByDesc('total')
+                ->limit(8)
+                ->get()
+                ->pluck('total', 'region')
+                ->toArray();
+
+            $visitStats['topPublications'] = \App\Models\VisitLog::selectRaw('publication_id, COUNT(*) as total')
+                ->whereNotNull('publication_id')
+                ->groupBy('publication_id')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->with('publication')
+                ->get();
+
+            $visitStats['recentVisits'] = \App\Models\VisitLog::with('publication')->latest()->limit(10)->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Dashboard tetap bisa dibuka sebelum migrasi visit_logs dijalankan.
+        }
+
         return view('admin.dashboard', [
             'totalPublications' => $totalPublications,
             'totalCategories' => $totalCategories,
@@ -127,6 +172,7 @@ class LoginController extends Controller
             'categoryData' => $categoryData,
             'monthlyData' => $monthlyData,
             'recentPublications' => $recentPublications,
+            'visitStats' => $visitStats,
             'activeMenu' => 'dashboard'
         ]);
     }

@@ -101,6 +101,121 @@
         </div>
     </div>
 
+    <!-- SECTION 2B: MONITORING KUNJUNGAN USER UMUM -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan Halaman</p>
+            <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalVisits'] ?? 0 }}</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-1">Event view (Beranda & Detail)</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Download Dokumen</p>
+            <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalDownloads'] ?? 0 }}</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-1">Via tombol Download PDF</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pengunjung Unik</p>
+            <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['uniqueVisitors'] ?? 0 }}</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-1">Berdasarkan IP unik (IP disamarkan)</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
+            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50">
+                <span>Kunjungan 7 Hari Terakhir</span>
+            </h3>
+            <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
+                @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)
+                <canvas id="visitsDailyChart" role="img" aria-label="Grafik data kunjungan dalam tujuh hari terakhir — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada kunjungan dalam tujuh hari terakhir" description="Grafik muncul setelah aktivitas pembaca tercatat." />
+                @endif
+            </div>
+            @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByDay'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
+            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50">
+                <span>Kunjungan per Wilayah (Top 8)</span>
+            </h3>
+            <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
+                @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)
+                <canvas id="visitsRegionChart" role="img" aria-label="Grafik data data wilayah — nilai tersedia pada rincian di bawah"></canvas>
+                @else
+                <x-empty-state title="Belum ada data wilayah" description="Distribusi wilayah akan tampil ketika data kunjungan tersedia." />
+                @endif
+            </div>
+            @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByRegion'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <h3 class="heading-font text-base font-bold text-slate-800"><span>Publikasi Terpopuler</span></h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/70 border-b border-slate-100">
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Judul</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Akses</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        @forelse (($visitStats['topPublications'] ?? collect()) as $row)
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-slate-800 line-clamp-1" title="{{ $row->publication?->title ?? '-' }}">
+                                    {{ $row->publication?->title ?? ('ID #' . $row->publication_id) }}
+                                </td>
+                                <td class="px-6 py-4 text-center font-bold text-bps-navy">{{ $row->total }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="px-6 py-8 text-center text-slate-400 font-semibold italic">Belum ada data kunjungan.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100">
+                <h3 class="heading-font text-base font-bold text-slate-800"><span>Aktivitas Terbaru</span></h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/70 border-b border-slate-100">
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Event</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Wilayah</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        @forelse (($visitStats['recentVisits'] ?? collect()) as $log)
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 text-slate-500 font-medium whitespace-nowrap">{{ $log->created_at?->format('d-m-Y H:i') }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold {{ $log->event_type === 'download' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700' }}">
+                                        {{ $log->event_type }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-600 font-medium">{{ $log->region ?? '-' }}{{ $log->city ? ' / ' . $log->city : '' }}</td>
+                                <td class="px-6 py-4 text-slate-400 font-medium">{{ $log->maskedIp() }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-slate-400 font-semibold italic">Belum ada aktivitas.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- SECTION 3: RECENT PUBLICATIONS TABLE -->
     <div class="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
@@ -158,7 +273,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ Storage::url($publication->pdf_path) }}" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-bps-primary hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all" title="Lihat PDF">
+                                    <a href="{{ $publication->pdf_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-bps-primary hover:text-blue-800 font-bold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all" title="Lihat PDF">
                                         <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

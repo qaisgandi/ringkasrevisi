@@ -40,4 +40,8 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
     ],
 
+    'vercel_blob' => [
+        'enabled' => (bool) env('BLOB_READ_WRITE_TOKEN'),
+    ],
+
 ];

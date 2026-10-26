@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\PublicationFileService;
 
 class Publication extends Model
 {
@@ -64,5 +65,22 @@ class Publication extends Model
     public function aiResult()
     {
         return $this->hasOne(PublicationAiResult::class, 'publication_id');
+    }
+
+    public function getPdfUrlAttribute(): string
+    {
+        return app(PublicationFileService::class)->url($this->pdf_path);
+    }
+
+    public function getFileSizeBytesAttribute(): int
+    {
+        if (!preg_match('/^\s*([0-9]+(?:\.[0-9]+)?)\s*(B|KB|MB|GB)?\s*$/i', (string) $this->file_size, $matches)) {
+            return 0;
+        }
+
+        $unit = strtoupper($matches[2] ?? 'B');
+        $multiplier = ['B' => 1, 'KB' => 1024, 'MB' => 1048576, 'GB' => 1073741824][$unit] ?? 1;
+
+        return (int) round((float) $matches[1] * $multiplier);
     }
 }

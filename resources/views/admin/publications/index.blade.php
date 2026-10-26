@@ -365,7 +365,7 @@
                 >
                     <!-- Left side: Cover Canvas (rendered via PDF.js) -->
                     <div class="w-24 sm:w-28 h-36 sm:h-40 shrink-0 rounded-xl relative overflow-hidden border border-slate-200 bg-slate-50 shadow-inner group/cover select-none">
-                        <canvas class="pdf-canvas w-full h-full object-contain hidden" data-pdf-url="{{ Storage::url($publication->pdf_path) }}"></canvas>
+                        <canvas class="pdf-canvas w-full h-full object-contain hidden" data-pdf-url="{{ $publication->pdf_url }}"></canvas>
 
                         <!-- Fallback BPS CSS Cover -->
                         <div class="pdf-placeholder w-full h-full bg-gradient-to-br from-bps-navy to-blue-900 flex flex-col justify-between p-3 text-white transition-opacity duration-300">

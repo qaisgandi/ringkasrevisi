@@ -129,7 +129,7 @@
                 <!-- Action Button Grid -->
                 <div class="flex flex-wrap gap-3">
                     <a
-                        href="{{ Storage::url($publication->pdf_path) }}"
+                        href="{{ $publication->pdf_url }}"
                         target="_blank"
                         class="inline-flex items-center gap-2 px-5 py-3 bg-bps-primary hover:bg-blue-700 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
@@ -138,7 +138,7 @@
                     </a>
 
                     <a
-                        href="{{ Storage::url($publication->pdf_path) }}"
+                        href="{{ $publication->pdf_url }}"
                         download="{{ basename($publication->pdf_path) }}"
                         class="inline-flex items-center gap-2 px-5 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-2xl font-semibold transition-all duration-200 text-sm hover:-translate-y-0.5 active:translate-y-0"
                     >
@@ -534,7 +534,7 @@
         if (window.lucide) window.lucide.createIcons();
 
         // PDF.js Document Loading (Single pass for thumbnail cover + text extraction)
-        const pdfUrl = @json(Storage::url($publication->pdf_path));
+        const pdfUrl = @json($publication->pdf_url);
         const canvas = document.getElementById('pdf-cover-canvas');
         const placeholder = document.getElementById('pdf-cover-placeholder');
 
@@ -605,7 +605,7 @@
                                     }
 
                                     // Get human readable file size
-                                    const bytes = {{ file_exists(Storage::disk('public')->path($publication->pdf_path)) ? filesize(Storage::disk('public')->path($publication->pdf_path)) : 0 }};
+                                    const bytes = {{ (int) ($publication->file_size_bytes ?? 0) }};
                                     let fileSizeStr = bytes + ' B';
                                     if (bytes >= 1048576) {
                                         fileSizeStr = (bytes / 1048576).toFixed(2) + ' MB';
