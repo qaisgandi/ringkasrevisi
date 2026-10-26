@@ -38,7 +38,7 @@ class GeminiChatService
         if (empty($apiKey)) {
             return [
                 'status' => true,
-                'reply' => $this->generateFallbackReply($userMessage, $publication, $isDocumentMode),
+                'reply' => $this->generateFallbackReply($userMessage, $publication, $isDocumentMode, false),
                 'mode' => $isDocumentMode ? 'document' : 'universal',
                 'publication' => $publication ? ['id' => $publication->id, 'title' => $publication->title] : null,
             ];
@@ -63,7 +63,7 @@ class GeminiChatService
             Log::warning('Gemini chat request failed.', ['exception_type' => get_class($e)]);
 
             // Fallback response jika terjadi kendala jaringan/kuota API
-            $fallbackReply = $this->generateFallbackReply($userMessage, $publication, $isDocumentMode);
+            $fallbackReply = $this->generateFallbackReply($userMessage, $publication, $isDocumentMode, true);
 
             return [
                 'status' => false,
@@ -319,14 +319,18 @@ PANDUAN MENJAWAB:
     /**
      * Respon fallback lokal pintar jika Gemini API sedang offline / terjadi timeout.
      */
-    private function generateFallbackReply(string $userMessage, ?Publication $publication, bool $isDocumentMode): string
+    private function generateFallbackReply(string $userMessage, ?Publication $publication, bool $isDocumentMode, bool $geminiConfigured): string
     {
+        $fallbackNotice = $geminiConfigured
+            ? 'Koneksi Gemini sedang bermasalah; saya menjawab dari data yang tersimpan di RINGKAS.'
+            : 'Gemini belum dikonfigurasi; saya menjawab dari data yang tersimpan di RINGKAS.';
+
         if ($isDocumentMode && $publication) {
             $ai = $publication->aiResult;
             $summary = $ai ? ($ai->summary ?? '') : ($publication->summary ?? '');
             $conclusion = $ai ? ($ai->conclusion ?? '') : ($publication->conclusion ?? '');
 
-            return "💡 *Catatan: Asisten AI sedang beroperasi dalam mode hemat offline.*\n\nBerikut ringkasan mengenai publikasi **{$publication->title}**:\n\n" .
+            return "💡 *{$fallbackNotice}*\n\nBerikut ringkasan mengenai publikasi **{$publication->title}**:\n\n" .
                 ($summary ?: 'Ringkasan belum tersedia untuk publikasi ini.') . "\n\n" .
                 "**Kesimpulan:**\n" . ($conclusion ?: 'Belum ada kesimpulan tercatat.');
         }
@@ -338,7 +342,40 @@ PANDUAN MENJAWAB:
         }
 
         if (preg_match('/\b(bantuan|help|bisa apa|fitur)\b/u', $keyword)) {
-            return 'Saya dapat mencari publikasi yang tersimpan di katalog berdasarkan judul, kategori, tahun, dan wilayah. Pada halaman publikasi, saya juga dapat menampilkan ringkasan yang sudah tersedia.';
+            return "💡 *{$fallbackNotice}*\n\nSaya dapat membantu dengan dua cara:\n- Cari publikasi memakai topik, judul, kategori, tahun, atau wilayah.\n- Tulis **“rangkum”** untuk merangkum publikasi yang tersedia; jika ada beberapa, saya akan meminta Anda memilih judulnya.";
+        }
+
+        if (preg_match('/\b(rangkum|ringkas|ringkasan|intisari|summary|summarize)\b/u', $keyword)) {
+            $matches = $this->findCatalogMatches($keyword);
+            if ($matches->isEmpty()) {
+                $matches = Publication::with('aiResult')->latest()->limit(4)->get();
+            }
+
+            if ($matches->isEmpty()) {
+                return "💡 *{$fallbackNotice}*\n\nBelum ada publikasi di katalog yang bisa dirangkum. Silakan pilih publikasi dari beranda setelah dokumen tersedia.";
+            }
+
+            if ($matches->count() === 1) {
+                $match = $matches->first();
+                $ai = $match->aiResult;
+                $summary = trim(strip_tags((string) ($ai?->summary ?? $match->summary ?? '')));
+                $conclusion = trim(strip_tags((string) ($ai?->conclusion ?? $match->conclusion ?? '')));
+                $reply = "💡 *{$fallbackNotice}*\n\n📘 **{$match->title}** ({$match->year})\n\n";
+                $reply .= $summary !== '' ? $summary : 'Ringkasan untuk publikasi ini belum diproses.';
+                if ($conclusion !== '') {
+                    $reply .= "\n\n**Kesimpulan:** {$conclusion}";
+                }
+                $reply .= "\n\n[Buka publikasi](/publications/{$match->id})";
+
+                return $reply;
+            }
+
+            $reply = "💡 *{$fallbackNotice}*\n\nSaya menemukan beberapa publikasi. Pilih judul yang ingin dirangkum:\n\n";
+            foreach ($matches->take(3) as $match) {
+                $reply .= "- [{$match->title} ({$match->year})](/publications/{$match->id})\n";
+            }
+
+            return $reply;
         }
 
         $definitions = [
@@ -358,15 +395,16 @@ PANDUAN MENJAWAB:
         $matches = $this->findCatalogMatches($keyword);
 
         if ($matches->isNotEmpty()) {
-            return $this->formatCatalogMatches($matches);
+            return "💡 *{$fallbackNotice}*\n\n" . $this->formatCatalogMatches($matches);
         }
 
-        return 'Saya sedang berjalan dalam mode katalog. Saya belum menemukan publikasi yang cocok. Coba gunakan kata kunci yang lebih singkat, seperti “kemiskinan”, “pertanian”, nama wilayah, atau tahun.';
+        $quotedQuery = mb_substr(trim($userMessage), 0, 120);
+        return "💡 *{$fallbackNotice}*\n\nSaya belum menemukan publikasi yang cocok dengan **{$quotedQuery}**. Coba kirim satu topik atau wilayah, misalnya **kemiskinan**, **hortikultura**, atau **Kota Tasikmalaya**. Untuk merangkum dokumen, ketik **“rangkum”**.";
     }
 
     private function findCatalogMatches(string $keyword)
     {
-        $stopWords = ['ada', 'apa', 'di', 'dari', 'dan', 'data', 'mana', 'untuk', 'tentang', 'yang', 'dengan', 'bisa', 'saya', 'cari', 'publikasi', 'terbaru', 'tingkat', 'angka', 'berapa', 'tolong'];
+        $stopWords = ['ada', 'apa', 'di', 'dari', 'dan', 'data', 'mana', 'untuk', 'tentang', 'yang', 'dengan', 'bisa', 'saya', 'cari', 'publikasi', 'terbaru', 'tingkat', 'angka', 'berapa', 'tolong', 'rangkum', 'ringkas', 'ringkasan', 'intisari', 'summary', 'summarize'];
         $terms = collect(preg_split('/[^\pL\pN]+/u', $keyword) ?: [])
             ->map(fn ($term) => trim($term))
             ->filter(fn ($term) => mb_strlen($term) >= 3 && !in_array($term, $stopWords, true))

@@ -8,6 +8,7 @@ use App\Models\VisitLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -185,7 +186,36 @@ class RedesignedViewsTest extends TestCase
             ->postJson('/chatbot/send', ['message' => 'Ada publikasi kemiskinan?'])
             ->assertOk()
             ->assertJsonPath('status', 'success')
-            ->assertJsonFragment(['reply' => "Berikut publikasi yang mungkin relevan. Pastikan kembali detailnya pada dokumen sumber:\n\n📘 **Statistik Kemiskinan Kota Tasikmalaya** (2026)\n• Kategori: Statistik Sosial | Wilayah: Nasional\n👉 [Buka Publikasi](/publications/1)\n\n"]);
+            ->assertJsonPath('reply', "💡 *Gemini belum dikonfigurasi; saya menjawab dari data yang tersimpan di RINGKAS.*\n\nBerikut publikasi yang mungkin relevan. Pastikan kembali detailnya pada dokumen sumber:\n\n📘 **Statistik Kemiskinan Kota Tasikmalaya** (2026)\n• Kategori: Statistik Sosial | Wilayah: Nasional\n👉 [Buka Publikasi](/publications/1)\n\n");
+    }
+
+    public function test_chatbot_summarizes_the_only_publication_when_user_says_rangkum(): void
+    {
+        config(['services.gemini.api_key' => 'test-api-key']);
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['error' => ['message' => 'temporary failure']], 503)]);
+        $user = User::create([
+            'name' => 'User Ringkasan',
+            'username' => 'user-ringkasan',
+            'email' => 'user-ringkasan@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'user',
+        ]);
+        $publication = Publication::create([
+            'title' => 'Statistik Perusahaan Hortikultura 2026',
+            'category' => 'Statistik Pertanian',
+            'year' => 2026,
+            'release_date' => '2026-01-01',
+            'pdf_path' => 'publications/hortikultura.pdf',
+            'summary' => 'Publikasi ini merangkum jumlah usaha dan tenaga kerja hortikultura.',
+            'conclusion' => 'Usaha hortikultura tersebar di berbagai wilayah.',
+            'status' => 'Selesai',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson('/chatbot/send', ['message' => 'rangkum'])
+            ->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonFragment(['reply' => "💡 *Koneksi Gemini sedang bermasalah; saya menjawab dari data yang tersimpan di RINGKAS.*\n\n📘 **Statistik Perusahaan Hortikultura 2026** (2026)\n\nPublikasi ini merangkum jumlah usaha dan tenaga kerja hortikultura.\n\n**Kesimpulan:** Usaha hortikultura tersebar di berbagai wilayah.\n\n[Buka publikasi](/publications/{$publication->id})"]);
     }
 
     public function test_admin_can_upload_a_pdf_through_the_original_upload_flow(): void
