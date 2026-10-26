@@ -167,10 +167,11 @@
                                     <span class="w-2 h-2 rounded-full bg-bps-lightBlue shrink-0" title="Filter aktif"></span>
                                 @endif
                             </div>
-                            <span class="text-[10px] md:text-xs text-slate-400 font-medium block mt-0.5">
+                            <span class="rk-category-count text-[10px] md:text-xs text-slate-400 font-medium block mt-1">
                                 {{ $count }} Publikasi
                             </span>
                         </div>
+                        <span class="rk-category-arrow" aria-hidden="true"><i data-lucide="arrow-up-right"></i></span>
                     </a>
                 @endforeach
             </div>

@@ -9,7 +9,7 @@
     <!-- SECTION 1: 4 STATS CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Card 1: Total Publikasi -->
-        <a href="{{ route('publications.index') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
+        <a href="{{ route('publications.index') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block rk-admin-metric">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Publikasi</p>
@@ -22,10 +22,11 @@
                     </svg>
                 </div>
             </div>
+            <div class="rk-admin-metric-link"><span>Lihat publikasi</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></div>
         </a>
 
         <!-- Card 2: Total Ringkasan -->
-        <a href="{{ route('admin.summaries') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
+        <a href="{{ route('admin.summaries') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block rk-admin-metric">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Ringkasan</p>
@@ -38,10 +39,11 @@
                     </svg>
                 </div>
             </div>
+            <div class="rk-admin-metric-link"><span>Lihat ringkasan</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></div>
         </a>
 
         <!-- Card 3: Kategori -->
-        <a href="{{ route('publications.index') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block">
+        <a href="{{ route('publications.index') }}" class="group bg-white p-6 rounded-xl shadow-md border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block rk-admin-metric">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kategori</p>
@@ -55,6 +57,7 @@
                     </svg>
                 </div>
             </div>
+            <div class="rk-admin-metric-link"><span>Lihat kategori</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></div>
         </a>
 
     </div>
