@@ -18,7 +18,7 @@ Diterapkan pada 13 Oktober 2026 di `D:\capstone1\RINGKAS-main`. Ini merupakan pe
 | PDF.js 2.16.105 memiliki advisory eksekusi JavaScript | Diganti PDF.js 6.4.299 yang dibundel lokal, termasuk worker; eval dan scripting dimatikan; aset PDF hanya dimuat pada halaman terkait |
 | HTML hasil formatter chatbot membutuhkan pertahanan tambahan | DOMPurify menyaring hasil sebelum masuk DOM; interpolasi username menggunakan encoding JavaScript aman |
 | Gemini menonaktifkan verifikasi TLS, key dalam URL | Verifikasi TLS aktif; API key dipindahkan ke header; error layanan tidak mencetak detail sensitif ke pengguna/log aplikasi |
-| Debug aktif di konfigurasi produksi dan entrypoint Vercel | Debug produksi dimatikan, error bootstrap tidak ditampilkan, cookie produksi Secure/HttpOnly; konfigurasi cache Vercel memakai database agar limiter persisten |
+| Debug aktif di konfigurasi produksi dan entrypoint Vercel | Debug produksi dimatikan, error bootstrap tidak ditampilkan, cookie produksi Secure/HttpOnly; cache Vercel memakai database terlebih dahulu dan fallback ke cache lokal saat database cache gagal |
 | Belum ada kebijakan header browser | CSP, nosniff, pembatasan framing, referrer policy, permissions policy, no-store untuk respons akun; HSTS pada HTTPS |
 | Lookup wilayah mengirim IP ke endpoint HTTP | Dinonaktifkan secara default; wilayah publik menjadi “Tidak diketahui” selama integrasi lama ini nonaktif |
 | Dependensi memiliki advisory keamanan | Paket npm terdampak diperbarui; Laravel, Guzzle, CommonMark, Flysystem dan dependensi terkait diperbarui |
@@ -64,7 +64,7 @@ Mode default hanya memeriksa. `--apply` menyalin ke disk privat, memverifikasi S
 ## Konfigurasi saat deployment
 
 1. Gunakan HTTPS dan `APP_ENV=production`, `APP_DEBUG=false`, serta APP_URL yang tepat. Cookie Secure aktif pada produksi. Jangan gunakan HTTP biasa untuk sesi produksi.
-2. Gunakan cache database/Redis bersama yang persisten, terutama pada Vercel/multi-instance. Tabel cache dari migrasi Laravel harus tersedia. Cache `array` tidak layak untuk rate limiter produksi.
+2. Pastikan tabel `cache` dari migrasi Laravel tersedia di database produksi agar rate limit login tetap konsisten di semua instance. Vercel memakai cache database terlebih dahulu dan beralih ke `array` jika database cache tidak tersedia; fallback ini mencegah error login, tetapi pembatasan tidak lagi dibagi antar-instance sampai cache bersama pulih.
 3. Isi `TRUSTED_PROXIES` dengan IP/CIDR proxy yang benar. Jangan menggunakan `*` pada server yang dapat diakses langsung dari internet.
 4. Jalankan migrasi file lama di lingkungan tujuan. Untuk Nginx/CDN tambahkan aturan penolakan `/storage/publications/` dan hapus cache salinan publik lama; aturan `.htaccess` hanya berlaku untuk Apache.
 5. Lakukan build sebelum menjalankan versi baru karena manifest sekarang mencakup `resources/js/pdf.js`.
