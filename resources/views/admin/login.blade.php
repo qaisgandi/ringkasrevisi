@@ -28,7 +28,7 @@
         }
     </style>
 </head>
-<body class="relative min-h-screen flex items-center justify-center p-4 selection:bg-bps-lightBlue selection:text-white">
+<body class="rk-login relative min-h-screen flex items-center justify-center p-4 selection:bg-bps-lightBlue selection:text-white">
 
     <!-- BACKGROUND DECORATIONS -->
     

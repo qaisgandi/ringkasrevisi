@@ -35,7 +35,8 @@
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-bps-bg text-slate-800 antialiased min-h-screen flex">
+<body class="rk-app rk-admin bg-bps-bg text-slate-800 antialiased min-h-screen flex">
+    <a class="rk-skip" href="#konten">Lewati navigasi</a>
 
     <!-- MOBILE SIDEBAR OVERLAY -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden md:hidden transition-opacity duration-300"></div>
@@ -346,7 +347,7 @@
         </header>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <main id="konten" class="flex-1 p-6 md:p-8 overflow-y-auto">
             @yield('content')
         </main>
 

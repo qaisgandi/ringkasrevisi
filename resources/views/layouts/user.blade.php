@@ -37,7 +37,8 @@
         @yield('styles')
     </style>
 </head>
-<body class="min-h-screen flex flex-col bg-[#fcfdfe] text-slate-800 antialiased">
+<body class="rk-app rk-user min-h-screen flex flex-col bg-[#fcfdfe] text-slate-800 antialiased">
+    <a class="rk-skip" href="#konten">Lewati navigasi</a>
 
     <!-- HEADER NAVIGATION -->
     <header class="h-20 bg-bps-navy border-b border-white/5 flex items-center justify-between px-4 md:px-12 sticky top-0 z-50 shrink-0 shadow-md shadow-black/5">
@@ -80,7 +81,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1">
+    <main id="konten" class="flex-1">
         @yield('content')
     </main>
 

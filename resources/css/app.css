@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './design-system.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -12,8 +13,8 @@
     --color-bps-blue: #0266b3;
     --color-bps-orange: #ff9e1b;
     --color-bps-green: #43b02a;
-    --color-bps-lightBlue: #1e5df0;
-    --color-bps-navy: #0f2a4a;
-    --color-bps-primary: #1E5EFF;
+    --color-bps-lightBlue: #2563EB;
+    --color-bps-navy: #112f50;
+    --color-bps-primary: #2563EB;
     --color-bps-bg: #F8FAFC;
 }
