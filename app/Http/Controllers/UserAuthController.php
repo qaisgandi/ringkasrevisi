@@ -46,11 +46,11 @@ class UserAuthController extends Controller
                 $request->session()->regenerateToken();
                 return back()
                     ->withInput($request->only('username'))
-                    ->with('error', 'Akun Administrator tidak dapat login di sini. Silakan login melalui Portal Admin (/admin/login).');
+                    ->with('error', 'Jenis akun ini tidak dapat digunakan pada portal pengguna.');
             }
 
             $request->session()->regenerate();
-            return redirect()->route('home')->with('success', 'Selamat datang kembali, ' . ($user->name ?: $user->username) . '!');
+            return redirect()->intended(route('home'))->with('success', 'Selamat datang kembali, ' . ($user->name ?: $user->username) . '!');
         }
 
         return back()

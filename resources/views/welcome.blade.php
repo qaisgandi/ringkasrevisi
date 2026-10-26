@@ -43,6 +43,15 @@
 <article><i data-lucide="book-open" aria-hidden="true"></i><div><h3>Dokumen sumber tetap tersedia</h3><p>Buka atau unduh publikasi asli untuk memeriksa tabel, definisi, dan detail yang tidak tercakup dalam ringkasan.</p></div></article>
 <article><i data-lucide="search" aria-hidden="true"></i><div><h3>Eksplorasi sesuai kebutuhan</h3><p>Jelajahi publikasi menurut kategori, mulai dari statistik sosial dan ekonomi hingga sensus dan survei.</p></div></article>
 </div></div></section>
+<section class="rk-section" id="kategori-publikasi"><div class="rk-wrap"><div class="rk-section-heading"><div><p class="rk-kicker">Katalog publik</p><h2>Jelajahi publikasi<br>menurut kategorinya.</h2></div><p>Pilih kategori untuk melihat koleksi yang tersedia. Masuk ke portal pembaca untuk membuka ringkasan dan dokumen sumber.</p></div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+@foreach($categories as $category)
+<a href="{{ route('home', ['category' => $category['name']]) }}" class="group flex min-h-28 items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $category['classes'] }}"><i data-lucide="{{ $category['icon'] }}" aria-hidden="true"></i></span>
+<span class="min-w-0"><strong class="block text-sm leading-snug text-slate-800">{{ $category['name'] }}</strong><small class="mt-1 block text-xs text-slate-500">{{ $category['count'] }} publikasi</small></span>
+</a>
+@endforeach
+</div></div></section>
 <section class="rk-section rk-example" id="contoh-hasil"><div class="rk-wrap"><div class="rk-section-heading"><div><p class="rk-kicker">03 / Contoh hasil</p><h2>Baca gambaran besarnya.<br>Tetap dekat dengan sumber.</h2></div><p>Berikut ilustrasi cara informasi ditata ulang. Contoh ini menjelaskan format, tanpa menyajikan angka atau temuan sebagai data resmi.</p></div>
 <div class="rk-comparison"><div><h3>Dokumen publikasi</h3><p>Publikasi statistik dapat memuat penjelasan konsep, metodologi, tabel, dan uraian per topik. Pembaca perlu memahami cakupan wilayah, periode, serta definisi indikator agar tidak keliru menafsirkan data.</p><p style="margin-top:18px">Dokumen asli menjadi rujukan untuk memeriksa angka, satuan, dan catatan yang menyertai setiap tabel.</p></div><div><h3>Susunan hasil ringkasan</h3><dl><dt>Ikhtisar</dt><dd>Gambaran isi dan cakupan publikasi.</dd><dt>Temuan utama</dt><dd>Poin penting dari hasil analisis dokumen.</dd><dt>Indikator</dt><dd>Informasi indikator yang ditemukan dalam publikasi.</dd><dt>Rujukan</dt><dd>Lokasi pembahasan apabila tersedia dalam hasil analisis.</dd></dl></div></div>
 <p class="rk-form-note" style="margin-top:18px">Hasil AI dapat mengandung kekeliruan. Gunakan publikasi asli sebagai rujukan utama.</p></div></section>

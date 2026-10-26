@@ -28,7 +28,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h3 class="font-bold text-sm sm:text-base leading-tight tracking-tight text-white heading-font">Tanya BPS AI</h3>
-                        <span class="px-2 py-0.5 text-[9px] font-extrabold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 rounded-full tracking-wider">Gemini</span>
+                        <span class="px-2 py-0.5 text-[9px] font-extrabold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 rounded-full tracking-wider">{{ config('services.gemini.api_key') ? 'Gemini' : 'Katalog' }}</span>
                     </div>
                     <p class="text-[11px] text-slate-300/90 font-medium mt-0.5 flex items-center gap-1.5" id="chatbotModeBadge">
                         @if($hasCurrentPublication)
@@ -167,7 +167,7 @@
                 </button>
             </form>
             <div class="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-400 font-medium">
-                <span>Didukung oleh Google Gemini AI</span>
+                <span>{{ config('services.gemini.api_key') ? 'Didukung oleh Google Gemini AI' : 'Jawaban berbasis katalog publikasi' }}</span>
                 <span class="hidden sm:inline">Tekan Enter untuk kirim</span>
             </div>
         </div>

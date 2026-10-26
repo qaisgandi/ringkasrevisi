@@ -42,6 +42,7 @@ return [
 
     'vercel_blob' => [
         'enabled' => (bool) env('BLOB_READ_WRITE_TOKEN'),
+        'serverless' => (bool) env('VERCEL', false),
     ],
 
 ];

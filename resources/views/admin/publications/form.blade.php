@@ -5,7 +5,7 @@
 <div class="rk-page-heading"><div><a href="{{ route('publications.index') }}" class="rk-link text-sm">← Daftar publikasi</a><h1 class="mt-4">{{ $editing ? 'Edit Publikasi' : 'Unggah Publikasi' }}</h1><p>{{ $editing ? 'Perbarui metadata atau ganti dokumen sumber publikasi.' : 'Tambahkan dokumen sumber sebelum memproses ringkasan.' }}</p></div></div>
 <x-alerts />
 <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_260px] gap-8">
-<form action="{{ $editing ? route('publications.update', $publication) : route('publications.store') }}" method="POST" enctype="multipart/form-data" class="rk-panel rk-form p-6 md:p-8" data-publication-upload data-submit-state @if(config('services.vercel_blob.enabled')) data-blob-upload-url="{{ url('/api/blob-upload') }}" data-upload-token-url="{{ route('publications.upload-token') }}" @endif>
+<form action="{{ $editing ? route('publications.update', $publication) : route('publications.store') }}" method="POST" enctype="multipart/form-data" class="rk-panel rk-form p-6 md:p-8" data-publication-upload data-submit-state @if(config('services.vercel_blob.enabled') || config('services.vercel_blob.serverless')) data-blob-upload-url="{{ url('/api/blob-upload') }}" data-upload-token-url="{{ route('publications.upload-token') }}" @endif>
 @csrf @if($editing) @method('PUT') @endif
 <input type="hidden" name="pdf_blob_url" value="{{ old('pdf_blob_url') }}">
 <input type="hidden" name="uploaded_file_size" value="{{ old('uploaded_file_size') }}">

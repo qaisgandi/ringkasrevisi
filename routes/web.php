@@ -6,6 +6,7 @@ use App\Http\Controllers\PublicationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserAuthController;
 use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\LandingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,12 +15,7 @@ use App\Http\Controllers\ChatbotController;
 */
 
 // Landing Page
-Route::get('/', function() {
-    if (\Illuminate\Support\Facades\Auth::check()) {
-        return redirect()->route('home');
-    }
-    return view('welcome');
-})->name('landing');
+Route::get('/', [LandingController::class, 'index'])->middleware('track.visit')->name('landing');
 
 // Portal Otentikasi Admin
 Route::get('/admin/login', [LoginController::class, 'index'])->name('admin.login');

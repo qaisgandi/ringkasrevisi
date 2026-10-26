@@ -38,7 +38,7 @@ class GeminiChatService
         if (empty($apiKey)) {
             return [
                 'status' => true,
-                'reply' => 'Asisten AI belum tersedia. Silakan coba lagi nanti atau hubungi pengelola.',
+                'reply' => $this->generateFallbackReply($userMessage, $publication, $isDocumentMode),
                 'mode' => $isDocumentMode ? 'document' : 'universal',
                 'publication' => $publication ? ['id' => $publication->id, 'title' => $publication->title] : null,
             ];
@@ -333,23 +333,73 @@ PANDUAN MENJAWAB:
 
         // Mode universal offline search
         $keyword = mb_strtolower($userMessage);
-        $matches = Publication::where('title', 'like', "%{$userMessage}%")
-            ->orWhere('category', 'like', "%{$userMessage}%")
-            ->orWhere('region', 'like', "%{$userMessage}%")
-            ->orWhere('year', 'like', "%{$userMessage}%")
-            ->take(3)
-            ->get();
-
-        if ($matches->isNotEmpty()) {
-            $reply = "Berikut adalah publikasi yang relevan dengan pencarian Anda:\n\n";
-            foreach ($matches as $match) {
-                $reply .= "📘 **{$match->title}** ({$match->year})\n";
-                $reply .= "• Kategori: {$match->category} | Wilayah: " . ($match->region ?: 'Nasional') . "\n";
-                $reply .= "👉 [Buka Publikasi](/publications/{$match->id})\n\n";
-            }
-            return $reply;
+        if (preg_match('/\b(halo|hai|hello|hi|selamat pagi|selamat siang|selamat sore|selamat malam)\b/u', $keyword)) {
+            return 'Halo! Saya bisa membantu mencari publikasi berdasarkan topik, kategori, tahun, atau wilayah. Coba tanyakan, misalnya: “Cari publikasi tentang kemiskinan”.';
         }
 
-        return "Maaf, saat ini koneksi ke server AI Gemini sedang mengalami kendala sementara. Anda dapat mencari publikasi secara langsung melalui kotak pencarian di halaman Beranda.";
+        if (preg_match('/\b(bantuan|help|bisa apa|fitur)\b/u', $keyword)) {
+            return 'Saya dapat mencari publikasi yang tersimpan di katalog berdasarkan judul, kategori, tahun, dan wilayah. Pada halaman publikasi, saya juga dapat menampilkan ringkasan yang sudah tersedia.';
+        }
+
+        $definitions = [
+            'ipm' => 'IPM (Indeks Pembangunan Manusia) merangkum capaian pembangunan manusia melalui dimensi kesehatan, pendidikan, dan standar hidup. Periksa publikasi sumber untuk definisi dan metode penghitungan yang digunakan.',
+            'gini' => 'Rasio Gini mengukur ketimpangan distribusi pengeluaran atau pendapatan. Nilai yang lebih tinggi menunjukkan ketimpangan yang lebih besar; perhatikan cakupan dan metode dalam publikasi sumber.',
+            'inflasi' => 'Inflasi menggambarkan perubahan tingkat harga barang dan jasa dari waktu ke waktu. Periode pembanding dan cakupan komoditas perlu diperiksa pada publikasi sumber.',
+            'pdrb' => 'PDRB (Produk Domestik Regional Bruto) menggambarkan nilai tambah barang dan jasa yang dihasilkan di suatu wilayah dalam periode tertentu. Perhatikan apakah data memakai harga berlaku atau harga konstan.',
+            'tpt' => 'TPT (Tingkat Pengangguran Terbuka) adalah persentase penganggur terhadap angkatan kerja. Definisi operasional dan periode rujukan dapat dilihat pada publikasi sumber.',
+        ];
+        foreach ($definitions as $term => $definition) {
+            if (str_contains($keyword, $term)) {
+                $matches = $this->findCatalogMatches($keyword);
+                return $definition . ($matches->isNotEmpty() ? "\n\n" . $this->formatCatalogMatches($matches) : '');
+            }
+        }
+
+        $matches = $this->findCatalogMatches($keyword);
+
+        if ($matches->isNotEmpty()) {
+            return $this->formatCatalogMatches($matches);
+        }
+
+        return 'Saya sedang berjalan dalam mode katalog. Saya belum menemukan publikasi yang cocok. Coba gunakan kata kunci yang lebih singkat, seperti “kemiskinan”, “pertanian”, nama wilayah, atau tahun.';
+    }
+
+    private function findCatalogMatches(string $keyword)
+    {
+        $stopWords = ['ada', 'apa', 'di', 'dari', 'dan', 'data', 'mana', 'untuk', 'tentang', 'yang', 'dengan', 'bisa', 'saya', 'cari', 'publikasi', 'terbaru', 'tingkat', 'angka', 'berapa', 'tolong'];
+        $terms = collect(preg_split('/[^\pL\pN]+/u', $keyword) ?: [])
+            ->map(fn ($term) => trim($term))
+            ->filter(fn ($term) => mb_strlen($term) >= 3 && !in_array($term, $stopWords, true))
+            ->unique()
+            ->take(5);
+
+        if ($terms->isEmpty()) {
+            return collect();
+        }
+
+        return Publication::query()
+            ->where(function ($query) use ($terms) {
+                foreach ($terms as $term) {
+                    $query->orWhere('title', 'like', "%{$term}%")
+                        ->orWhere('category', 'like', "%{$term}%")
+                        ->orWhere('region', 'like', "%{$term}%")
+                        ->orWhere('year', 'like', "%{$term}%");
+                }
+            })
+            ->latest()
+            ->limit(3)
+            ->get();
+    }
+
+    private function formatCatalogMatches($matches): string
+    {
+        $reply = "Berikut publikasi yang mungkin relevan. Pastikan kembali detailnya pada dokumen sumber:\n\n";
+        foreach ($matches as $match) {
+            $reply .= "📘 **{$match->title}** ({$match->year})\n";
+            $reply .= "• Kategori: {$match->category} | Wilayah: " . ($match->region ?: 'Nasional') . "\n";
+            $reply .= "👉 [Buka Publikasi](/publications/{$match->id})\n\n";
+        }
+
+        return $reply;
     }
 }

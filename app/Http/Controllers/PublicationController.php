@@ -106,6 +106,12 @@ class PublicationController extends Controller
                     ->withErrors(['pdf' => 'Gagal mengunggah berkas. Pastikan berkas PDF Anda valid dan ukuran tidak melebihi 25 MB.']);
             }
 
+            if (config('services.vercel_blob.serverless') && !$blobUrl) {
+                return redirect()->back()->withInput()->withErrors([
+                    'pdf' => 'Penyimpanan dokumen belum siap untuk deployment ini. Hubungkan Vercel Blob dan pastikan BLOB_READ_WRITE_TOKEN tersedia pada environment deployment.',
+                ]);
+            }
+
             if ($blobUrl && !app(\App\Services\PublicationFileService::class)->isTrustedBlobUrl($blobUrl)) {
                 return back()->withInput()->withErrors(['pdf' => 'Berkas unggahan tidak berasal dari penyimpanan yang valid.']);
             }
@@ -356,6 +362,11 @@ class PublicationController extends Controller
 
         // Jika ada file PDF baru yang diunggah
         $blobUrl = $request->input('pdf_blob_url');
+        if (config('services.vercel_blob.serverless') && $request->hasFile('pdf') && !$blobUrl) {
+            return back()->withInput()->withErrors([
+                'pdf' => 'Penyimpanan dokumen belum siap untuk deployment ini. Hubungkan Vercel Blob dan pastikan BLOB_READ_WRITE_TOKEN tersedia pada environment deployment.',
+            ]);
+        }
         if ($blobUrl && !app(\App\Services\PublicationFileService::class)->isTrustedBlobUrl($blobUrl)) {
             return back()->withInput()->withErrors(['pdf' => 'Berkas unggahan tidak berasal dari penyimpanan yang valid.']);
         }

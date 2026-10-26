@@ -13,19 +13,19 @@ class TrackVisit
 {
     /**
      * Catat kunjungan halaman user (1x per session per halaman).
-     * Hanya untuk GET pada route home & user.publications.show agar
+     * Hanya untuk GET pada landing, home, dan user.publications.show agar
      * request chatbot/download tidak ikut tercatat sebagai view.
      */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
-        if (!$request->isMethod('get')) {
+        if (!$request->isMethod('get') || !$response->isSuccessful()) {
             return $response;
         }
 
         $routeName = $request->route()?->getName();
-        if (!in_array($routeName, ['home', 'user.publications.show'], true)) {
+        if (!in_array($routeName, ['landing', 'home', 'user.publications.show'], true)) {
             return $response;
         }
 

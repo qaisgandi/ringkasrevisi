@@ -21,7 +21,7 @@ class RoleMiddleware
             if (in_array('admin', $roles)) {
                 return redirect()->route('admin.login')->with('error', 'Silakan login sebagai Admin terlebih dahulu.');
             }
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            return redirect()->guest(route('login'))->with('error', 'Silakan login terlebih dahulu.');
         }
 
         $user = Auth::user();

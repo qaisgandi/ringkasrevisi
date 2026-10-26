@@ -71,14 +71,41 @@ class RedesignedViewsTest extends TestCase
         ]);
         $this->get('/admin/users/' . $managedUser->id . '/edit')->assertOk();
         $this->actingAs($managedUser)->get('/profile')->assertOk();
-        $this->get('/home')->assertSee('bpsChatbotRoot')->assertSee('Tanya BPS AI');
+        $this->get('/home')
+            ->assertSee('bpsChatbotRoot')
+            ->assertSee('Tanya BPS AI')
+            ->assertSee('Kategori Publikasi')
+            ->assertSee('data-lucide="users"', false)
+            ->assertSee('Lihat Ringkasan');
     }
 
     public function test_redesigned_authentication_pages_render_for_guests(): void
     {
-        $this->get('/login')->assertOk()->assertSee('Masuk');
+        $this->get('/login')->assertOk()->assertSee('Masuk')->assertDontSee('portal admin');
         $this->get('/register')->assertOk()->assertSee('Buat akun');
         $this->get('/admin/login')->assertOk()->assertSee('Masuk');
+    }
+
+    public function test_public_landing_shows_category_cards_and_records_anonymous_visits(): void
+    {
+        Publication::create([
+            'title' => 'Publikasi Landing Test',
+            'category' => 'Statistik Ekonomi',
+            'year' => 2026,
+            'release_date' => '2026-01-01',
+            'pdf_path' => 'publications/landing.pdf',
+            'status' => 'Pending',
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Katalog publik')
+            ->assertSee('data-lucide="trending-up"', false)
+            ->assertSee('/home?category=Statistik%20Ekonomi')
+            ->assertSee('1 publikasi');
+        $this->get('/');
+
+        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'An anonymous landing visit is counted once per session.');
     }
 
     public function test_user_page_visits_and_pdf_downloads_are_counted_for_admin_statistics(): void
@@ -132,6 +159,33 @@ class RedesignedViewsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'success')
             ->assertJsonStructure(['reply', 'mode']);
+    }
+
+    public function test_chatbot_uses_the_publication_catalog_when_gemini_is_not_configured(): void
+    {
+        config(['services.gemini.api_key' => null]);
+        $user = User::create([
+            'name' => 'User Katalog',
+            'username' => 'user-katalog',
+            'email' => 'user-katalog@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'user',
+        ]);
+        Publication::create([
+            'title' => 'Statistik Kemiskinan Kota Tasikmalaya',
+            'category' => 'Statistik Sosial',
+            'year' => 2026,
+            'release_date' => '2026-01-01',
+            'pdf_path' => 'publications/kemiskinan.pdf',
+            'summary' => 'Ringkasan kemiskinan untuk pengujian.',
+            'status' => 'Selesai',
+        ]);
+
+        $this->actingAs($user)
+            ->postJson('/chatbot/send', ['message' => 'Ada publikasi kemiskinan?'])
+            ->assertOk()
+            ->assertJsonPath('status', 'success')
+            ->assertJsonFragment(['reply' => "Berikut publikasi yang mungkin relevan. Pastikan kembali detailnya pada dokumen sumber:\n\n📘 **Statistik Kemiskinan Kota Tasikmalaya** (2026)\n• Kategori: Statistik Sosial | Wilayah: Nasional\n👉 [Buka Publikasi](/publications/1)\n\n"]);
     }
 
     public function test_admin_can_upload_a_pdf_through_the_original_upload_flow(): void
@@ -189,5 +243,28 @@ class RedesignedViewsTest extends TestCase
             'pdf_blob_url' => 'https://attacker.example/publications/evil.pdf',
             'uploaded_file_size' => 1024,
         ])->assertRedirect('/admin/publications/create')->assertSessionHasErrors('pdf');
+    }
+
+    public function test_vercel_upload_never_falls_back_to_ephemeral_local_storage(): void
+    {
+        config(['services.vercel_blob.serverless' => true]);
+        Storage::fake('public');
+        $admin = User::create([
+            'name' => 'Admin Vercel',
+            'username' => 'admin-vercel',
+            'email' => 'admin-vercel@example.test',
+            'password' => Hash::make('temporary-test-password'),
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)->from('/admin/publications/create')->post('/admin/publications', [
+            'title' => 'Publikasi Tanpa Blob',
+            'category' => 'Publikasi Umum',
+            'release_date' => '2026-10-26',
+            'pdf' => UploadedFile::fake()->createWithContent('no-blob.pdf', '%PDF-1.4 test'),
+        ])->assertRedirect('/admin/publications/create')->assertSessionHasErrors('pdf');
+
+        $this->assertDatabaseMissing('publications', ['title' => 'Publikasi Tanpa Blob']);
+        Storage::disk('public')->assertMissing('publications');
     }
 }
