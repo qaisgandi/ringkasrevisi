@@ -3,7 +3,7 @@
 @section('title', 'Dashboard Admin - Sistem Ringkasan & Manajemen Publikasi Statistik BPS')
 
 @section('content')
-<div class="rk-page-heading"><div><p class="rk-kicker">Panel administrator</p><h1>{{ request('view') === 'statistics' ? 'Statistik Ringkasan' : 'Dashboard' }}</h1><p>{{ request('view') === 'statistics' ? 'Distribusi publikasi dan ringkasan dari data yang tersimpan.' : 'Pantau koleksi publikasi, hasil pemrosesan, dan status terbaru.' }}</p></div><a href="{{ route('publications.create') }}" class="rk-btn">Unggah publikasi</a></div>
+<div class="rk-page-heading rk-admin-heading"><div><p class="rk-kicker rk-area-kicker"><i data-lucide="{{ request('view') === 'statistics' ? 'chart-no-axes-combined' : 'layout-dashboard' }}" aria-hidden="true"></i>Panel administrator</p><h1>{{ request('view') === 'statistics' ? 'Statistik Ringkasan' : 'Dashboard' }}</h1><p>{{ request('view') === 'statistics' ? 'Distribusi publikasi dan ringkasan dari data yang tersimpan.' : 'Pantau koleksi publikasi, hasil pemrosesan, dan status terbaru.' }}</p></div><a href="{{ route('publications.create') }}" class="rk-btn"><i data-lucide="upload" aria-hidden="true"></i>Unggah publikasi</a></div>
 <div class="space-y-8">
 
     <!-- SECTION 1: 4 STATS CARDS -->
@@ -102,19 +102,19 @@
     </div>
 
     <!-- SECTION 2B: MONITORING KUNJUNGAN USER UMUM -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan Halaman</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 rk-visit-stats">
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
+            <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan Halaman</p><span class="rk-visit-icon"><i data-lucide="eye" aria-hidden="true"></i></span></div>
             <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalVisits'] ?? 0 }}</h3>
             <p class="text-[11px] text-slate-400 font-medium mt-1">Event view (Beranda & Detail)</p>
         </div>
-        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Download Dokumen</p>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
+            <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Download Dokumen</p><span class="rk-visit-icon"><i data-lucide="download" aria-hidden="true"></i></span></div>
             <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalDownloads'] ?? 0 }}</h3>
             <p class="text-[11px] text-slate-400 font-medium mt-1">Via tombol Download PDF</p>
         </div>
-        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pengunjung Unik</p>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
+            <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pengunjung Unik</p><span class="rk-visit-icon"><i data-lucide="users-round" aria-hidden="true"></i></span></div>
             <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['uniqueVisitors'] ?? 0 }}</h3>
             <p class="text-[11px] text-slate-400 font-medium mt-1">Berdasarkan IP unik (IP disamarkan)</p>
         </div>
@@ -122,7 +122,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
-            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50">
+            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50 rk-area-title">
+                <i data-lucide="activity" aria-hidden="true"></i>
                 <span>Kunjungan 7 Hari Terakhir</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
@@ -135,7 +136,8 @@
             @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByDay'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
-            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50">
+            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50 rk-area-title">
+                <i data-lucide="map-pinned" aria-hidden="true"></i>
                 <span>Kunjungan per Wilayah (Top 8)</span>
             </h3>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">

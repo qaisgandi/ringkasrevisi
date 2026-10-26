@@ -24,13 +24,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <section class="rk-catalog-hero"><div class="rk-wrap">
-        <p class="rk-kicker">Katalog publikasi BPS</p><h1>Apa yang ingin Anda pahami?</h1>
+        <p class="rk-kicker rk-area-kicker"><i data-lucide="library" aria-hidden="true"></i>Katalog publikasi BPS</p><h1>Apa yang ingin Anda pahami?</h1>
         <p>Temukan publikasi, pelajari ringkasannya, dan telusuri informasi dalam dokumen sumber.</p>
         <form action="{{ route('home') }}#publikasi-terbaru" method="GET" class="rk-search" role="search">
             @if(request('category'))<input type="hidden" name="category" value="{{ request('category') }}">@endif
             <label for="catalog-search" class="sr-only">Cari judul, kategori, tahun, atau wilayah</label>
             <input id="catalog-search" class="rk-input" name="search" value="{{ request('search') }}" placeholder="Cari judul, kategori, tahun, atau wilayah">
-            <button type="submit" class="rk-btn">Cari</button>
+            <button type="submit" class="rk-btn"><i data-lucide="search" aria-hidden="true"></i>Cari</button>
         </form>
     </div></section>
 
@@ -41,7 +41,7 @@
         <section id="kategori-publikasi" class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="heading-font text-xl md:text-2xl font-black text-bps-navy tracking-tight">Kategori Publikasi</h3>
+                    <h3 class="heading-font rk-area-title text-xl md:text-2xl font-black text-bps-navy tracking-tight"><span class="rk-area-icon"><i data-lucide="folders" aria-hidden="true"></i></span>Kategori Publikasi</h3>
                     <p class="text-xs md:text-sm text-slate-400 font-medium mt-1">Saring publikasi berdasarkan 8 kategori data sektoral BPS</p>
                 </div>
                 @if(request('category'))
@@ -181,7 +181,7 @@
             <!-- Section Header & Filter Status -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="heading-font text-xl md:text-2xl font-black text-bps-navy tracking-tight">Daftar Publikasi</h3>
+                    <h3 class="heading-font rk-area-title text-xl md:text-2xl font-black text-bps-navy tracking-tight"><span class="rk-area-icon"><i data-lucide="book-open-check" aria-hidden="true"></i></span>Daftar Publikasi</h3>
                     <p class="text-xs md:text-sm text-slate-400 font-medium mt-1">
                         Daftar publikasi statistik resmi BPS beserta ringkasan cerdas
                     </p>
