@@ -504,9 +504,9 @@
             </div>
 
             <!-- Right: 9. Kesimpulan -->
-            <div class="bg-gradient-to-br from-blue-50/50 to-indigo-50/30 rounded-2xl border border-blue-100/40 p-6 md:p-8 space-y-4 flex flex-col justify-between">
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 space-y-4 flex flex-col justify-between">
                 <div class="space-y-3">
-                    <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-blue-100/50 pb-2">
+                    <h3 class="heading-font text-base font-extrabold text-bps-navy flex items-center gap-2 border-b border-slate-100 pb-2">
                         <i data-lucide="check-circle-2" class="w-4 h-4 text-bps-primary"></i>
                         <span>9. Kesimpulan</span>
                     </h3>
@@ -518,8 +518,12 @@
                         <p class="text-xs text-slate-400 italic">Data tidak tersedia pada publikasi ini.</p>
                     @endif
                 </div>
-                <div class="flex justify-end pt-4 border-t border-blue-100/20 text-[9px] text-slate-400 font-bold tracking-wider uppercase select-none">
-                    ikhtisar eksekutif AI
+                <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 text-[9px] font-bold tracking-wider uppercase select-none">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-bps-primary border border-blue-100">
+                        <i data-lucide="sparkles" class="w-2.5 h-2.5"></i>
+                        Ringkasan AI
+                    </span>
+                    <span class="text-slate-400">ikhtisar eksekutif AI</span>
                 </div>
             </div>
         </div>
