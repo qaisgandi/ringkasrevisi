@@ -54,7 +54,7 @@ class ChatbotController extends Controller
         $publicationId = $request->input('publication_id');
 
         if ($publicationId) {
-            $publication = Publication::find($publicationId);
+            $publication = Publication::query()->summarized()->find($publicationId);
             if ($publication) {
                 return response()->json([
                     'mode' => 'document',

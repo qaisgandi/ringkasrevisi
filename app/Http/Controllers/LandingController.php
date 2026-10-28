@@ -24,6 +24,7 @@ class LandingController extends Controller
         ];
 
         $counts = Publication::query()
+            ->summarized()
             ->selectRaw('category, COUNT(*) as aggregate')
             ->groupBy('category')
             ->pluck('aggregate', 'category');

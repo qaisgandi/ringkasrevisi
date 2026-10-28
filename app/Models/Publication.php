@@ -67,6 +67,23 @@ class Publication extends Model
         return $this->hasOne(PublicationAiResult::class, 'publication_id');
     }
 
+    /**
+     * Batasi query ke publikasi yang sudah selesai diringkas.
+     * Hanya publikasi inilah yang boleh tampil di portal user umum.
+     */
+    public function scopeSummarized($query)
+    {
+        return $query->where('status', 'Selesai');
+    }
+
+    /**
+     * Apakah publikasi sudah selesai diringkas dan siap diakses user umum.
+     */
+    public function isSummarized(): bool
+    {
+        return $this->status === 'Selesai';
+    }
+
     public function getPdfUrlAttribute(): string
     {
         return app(PublicationFileService::class)->url($this->pdf_path);

@@ -139,7 +139,7 @@ class UserAuthController extends Controller
             'Sensus & Survei',
         ];
 
-        $query = Publication::with('aiResult');
+        $query = Publication::query()->summarized()->with('aiResult');
 
         // Filter berdasarkan kategori jika ditentukan
         if ($request->filled('category')) {
@@ -160,13 +160,13 @@ class UserAuthController extends Controller
         // Urutkan dari yang paling baru diunggah
         $publications = $query->latest()->get();
 
-        // Hitung total publikasi per masing-masing dari 8 kategori resmi
+        // Hitung total publikasi per masing-masing dari 8 kategori resmi (hanya yang sudah diringkas)
         $categoryCounts = [];
         foreach ($officialCategories as $cat) {
-            $categoryCounts[$cat] = Publication::where('category', $cat)->count();
+            $categoryCounts[$cat] = Publication::query()->summarized()->where('category', $cat)->count();
         }
 
-        $totalAllPublications = Publication::count();
+        $totalAllPublications = Publication::query()->summarized()->count();
 
         return view('user.home', [
             'publications' => $publications,
@@ -231,6 +231,12 @@ class UserAuthController extends Controller
      */
     public function showPublication(Publication $publication)
     {
+        if (! $publication->isSummarized()) {
+            return redirect()
+                ->route('home')
+                ->with('error', 'Publikasi ini belum tersedia untuk umum karena belum selesai diringkas.');
+        }
+
         return view('user.show_publication', [
             'publication' => $publication,
         ]);
@@ -239,6 +245,8 @@ class UserAuthController extends Controller
     /** Unduh PDF publikasi dan catat event unduhan untuk dashboard admin. */
     public function downloadPublication(Request $request, Publication $publication)
     {
+        abort_unless($publication->isSummarized(), 404);
+
         $fileService = app(\App\Services\PublicationFileService::class);
         $isBlob = $fileService->isTrustedBlobUrl((string) $publication->pdf_path);
         abort_unless($isBlob || preg_match('/\Apublications\/[a-zA-Z0-9_.-]+\.pdf\z/i', (string) $publication->pdf_path), 404);

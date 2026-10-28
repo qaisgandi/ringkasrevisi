@@ -95,6 +95,17 @@ class RedesignedViewsTest extends TestCase
             'year' => 2026,
             'release_date' => '2026-01-01',
             'pdf_path' => 'publications/landing.pdf',
+            'summary' => 'Ringkasan publikasi landing.',
+            'status' => 'Selesai',
+        ]);
+
+        // Publikasi yang belum diringkas tidak boleh dihitung di landing publik.
+        Publication::create([
+            'title' => 'Publikasi Belum Ringkas',
+            'category' => 'Statistik Sosial',
+            'year' => 2026,
+            'release_date' => '2026-01-01',
+            'pdf_path' => 'publications/pending.pdf',
             'status' => 'Pending',
         ]);
 
@@ -103,7 +114,8 @@ class RedesignedViewsTest extends TestCase
             ->assertSee('Katalog publik')
             ->assertSee('data-lucide="trending-up"', false)
             ->assertSee('/home?category=Statistik%20Ekonomi')
-            ->assertSee('1 publikasi');
+            ->assertSee('1 publikasi')
+            ->assertDontSee('2 publikasi');
         $this->get('/');
 
         $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'An anonymous landing visit is counted once per session.');

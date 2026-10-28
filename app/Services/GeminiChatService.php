@@ -22,7 +22,7 @@ class GeminiChatService
         $isDocumentMode = false;
 
         if ($publicationId) {
-            $publication = Publication::with('aiResult')->find($publicationId);
+            $publication = Publication::query()->summarized()->with('aiResult')->find($publicationId);
             if ($publication) {
                 $isDocumentMode = true;
             }
@@ -80,7 +80,7 @@ class GeminiChatService
      */
     private function buildUniversalSystemInstruction(): string
     {
-        $publications = Publication::with('aiResult')->latest()->get();
+        $publications = Publication::query()->summarized()->with('aiResult')->latest()->get();
 
         $catalogSummary = [];
         foreach ($publications as $pub) {
@@ -348,7 +348,7 @@ PANDUAN MENJAWAB:
         if (preg_match('/\b(rangkum|ringkas|ringkasan|intisari|summary|summarize)\b/u', $keyword)) {
             $matches = $this->findCatalogMatches($keyword);
             if ($matches->isEmpty()) {
-                $matches = Publication::with('aiResult')->latest()->limit(4)->get();
+                $matches = Publication::query()->summarized()->with('aiResult')->latest()->limit(4)->get();
             }
 
             if ($matches->isEmpty()) {
@@ -416,6 +416,7 @@ PANDUAN MENJAWAB:
         }
 
         return Publication::query()
+            ->summarized()
             ->where(function ($query) use ($terms) {
                 foreach ($terms as $term) {
                     $query->orWhere('title', 'like', "%{$term}%")
