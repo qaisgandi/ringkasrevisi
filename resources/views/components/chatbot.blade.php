@@ -151,7 +151,7 @@
         <!-- FOOTER / INPUT AREA -->
         <div class="p-3 bg-white border-t border-slate-200 shrink-0">
             <form id="chatbotForm" class="flex items-end gap-2">
-                <div class="relative flex-1 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                <div class="relative flex-1 bg-slate-50 border border-slate-200 rounded-2xl transition-all">
                     <textarea
                         id="chatbotInput" aria-label="Pertanyaan tentang publikasi"
                         rows="1"
@@ -204,6 +204,18 @@
     }
     .animate-fadeIn {
         animation: fadeIn 0.25s ease-out forwards;
+    }
+    /* Input chat: fokus mengikuti bentuk kotak (rounded), tanpa outline kotak biru. */
+    #chatbotInput {
+        border-radius: inherit;
+    }
+    #chatbotInput:focus,
+    #chatbotInput:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+    #chatbotForm > div:focus-within {
+        border-color: #94a3b8;
     }
     .chatbot-answer-scroll {
         scrollbar-width: thin;
