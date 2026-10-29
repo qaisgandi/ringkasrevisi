@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publication;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -131,39 +132,81 @@ class LoginController extends Controller
             'recentVisits' => collect(),
         ];
 
-        try {
-            $visitStats['totalVisits'] = \App\Models\VisitLog::where('event_type', 'view')->count();
-            $visitStats['totalDownloads'] = \App\Models\VisitLog::where('event_type', 'download')->count();
-            $visitStats['uniqueVisitors'] = \App\Models\VisitLog::whereNotNull('ip_address')
-                ->distinct()->count('ip_address');
+        $loadVisitStat = function (string $key, callable $load) use (&$visitStats): void {
+            try {
+                $visitStats[$key] = $load();
+            } catch (\Throwable $e) {
+                // A broken chart query must not suppress the other dashboard panels.
+                Log::warning('Admin visit statistic could not be loaded.', [
+                    'statistic' => $key,
+                    'exception' => $e::class,
+                ]);
+            }
+        };
 
-            for ($i = 6; $i >= 0; $i--) {
-                $date = now()->subDays($i);
-                $visitStats['visitsByDay'][$date->format('d M')] = \App\Models\VisitLog::where('event_type', 'view')
-                    ->whereDate('created_at', $date->toDateString())->count();
+        $loadVisitStat('totalVisits', fn () => \App\Models\VisitLog::where('event_type', 'view')->count());
+        $loadVisitStat('totalDownloads', fn () => \App\Models\VisitLog::where('event_type', 'download')->count());
+        $loadVisitStat('uniqueVisitors', fn () => \App\Models\VisitLog::whereNotNull('ip_address')
+            ->distinct()->count('ip_address'));
+
+        $loadVisitStat('visitsByDay', function () {
+            $timezone = config('app.timezone');
+            $start = now($timezone)->startOfDay()->subDays(6);
+            $end = now($timezone)->startOfDay()->addDay();
+            $dailyCounts = [];
+
+            for ($day = $start->copy(); $day->lt($end); $day->addDay()) {
+                $dailyCounts[$day->format('d M')] = 0;
             }
 
-            $visitStats['visitsByRegion'] = \App\Models\VisitLog::selectRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui') as region, COUNT(*) as total")
+            \App\Models\VisitLog::where('event_type', 'view')
+                ->where('created_at', '>=', $start)
+                ->where('created_at', '<', $end)
+                ->cursor(['created_at'])
+                ->each(function ($visit) use (&$dailyCounts, $timezone) {
+                    $label = $visit->created_at->timezone($timezone)->format('d M');
+                    if (array_key_exists($label, $dailyCounts)) {
+                        $dailyCounts[$label]++;
+                    }
+                });
+
+            return $dailyCounts;
+        });
+
+        $loadVisitStat('visitsByRegion', function () {
+            $counts = [];
+            \App\Models\VisitLog::select('region')
+                ->selectRaw('COUNT(*) as total')
                 ->where('event_type', 'view')
-                ->groupByRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui')")
+                ->groupBy('region')
                 ->orderByDesc('total')
-                ->limit(8)
+                ->limit(40)
                 ->get()
-                ->pluck('total', 'region')
-                ->toArray();
+                ->each(function ($row) use (&$counts) {
+                    $region = trim((string) $row->region);
+                    $region = $region !== '' ? $region : 'Tidak diketahui';
+                    $counts[$region] = ($counts[$region] ?? 0) + (int) $row->total;
+                });
 
-            $visitStats['topPublications'] = \App\Models\VisitLog::selectRaw('publication_id, COUNT(*) as total')
-                ->whereNotNull('publication_id')
-                ->groupBy('publication_id')
-                ->orderByDesc('total')
-                ->limit(5)
-                ->with('publication')
-                ->get();
+            arsort($counts);
+            return array_slice($counts, 0, 8, true);
+        });
 
-            $visitStats['recentVisits'] = \App\Models\VisitLog::with('publication')->latest()->limit(10)->get();
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Dashboard tetap bisa dibuka sebelum migrasi visit_logs dijalankan.
-        }
+        $loadVisitStat('topPublications', fn () => \App\Models\VisitLog::select('publication_id')
+            ->selectRaw('COUNT(*) as total')
+            ->whereNotNull('publication_id')
+            ->whereIn('event_type', ['view', 'download'])
+            ->groupBy('publication_id')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->with('publication')
+            ->get());
+
+        $loadVisitStat('recentVisits', fn () => \App\Models\VisitLog::with('publication')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get());
 
         return view('admin.dashboard', [
             'totalPublications' => $totalPublications,

@@ -7,6 +7,7 @@ use App\Services\IpGeolocationService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackVisit
@@ -44,7 +45,7 @@ class TrackVisit
 
         try {
             $ip = $request->ip();
-            $geo = app(IpGeolocationService::class)->locate($ip);
+            $geo = app(IpGeolocationService::class)->locateRequest($request);
 
             VisitLog::create([
                 'user_id' => Auth::id(),
@@ -56,8 +57,12 @@ class TrackVisit
                 'user_agent' => substr((string) $request->userAgent(), 0, 500),
                 'url' => substr('/' . ltrim($request->path(), '/'), 0, 500),
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Tracking tidak boleh menggagalkan request utama.
+            Log::warning('Visit tracking could not save an event.', [
+                'exception' => $e::class,
+                'route' => $routeName,
+            ]);
         }
 
         return $response;

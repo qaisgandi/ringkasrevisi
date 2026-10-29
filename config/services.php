@@ -45,4 +45,11 @@ return [
         'serverless' => (bool) env('VERCEL', false),
     ],
 
+    'geoip' => [
+        // Vercel supplies these headers without an external IP lookup.
+        'use_vercel_headers' => (bool) env('VERCEL', false),
+        // The legacy third-party lookup remains opt-in for non-Vercel hosts.
+        'enabled' => (bool) env('GEOIP_ENABLED', false),
+    ],
+
 ];
