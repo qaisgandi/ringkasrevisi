@@ -97,7 +97,7 @@
                             <p>Saya siap membantu Anda membedah dan menjawab pertanyaan seputar isi buku <strong>"{{ $currentPublication->title }}"</strong>.</p>
                             <p class="mt-1.5 text-slate-500">Anda juga dapat menanyakan data statistik lainnya yang ada di seluruh katalog BPS.</p>
                         @else
-                            <p>Ada yang bisa saya bantu? Anda dapat menanyakan letak data tertentu (seperti <em>"Ada di publikasi mana angka IPM?"</em>), rekomendasi buku publikasi, indikator statistik, atau definisi konsep BPS.</p>
+                            <p>Ada yang bisa saya bantu? Tanyakan dengan bahasa sehari-hari, misalnya <em>"ada data kemiskinan terbaru?"</em>, <em>"publikasi apa yang membahas IPM?"</em>, atau <em>"apa itu Gini Ratio?"</em>.</p>
                         @endif
                     </div>
                     <span class="text-[10px] text-slate-400 font-medium pl-1">Baru saja</span>
@@ -122,13 +122,13 @@
                         </button>
                     @else
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            Ada di publikasi mana data tingkat IPM terbaru?
+                            Ada data kemiskinan terbaru?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            Di mana saya bisa melihat data kemiskinan & inflasi?
+                            Publikasi apa yang membahas IPM?
                         </button>
                         <button type="button" class="quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left">
-                            Publikasi apa saja yang tersedia untuk tahun 2024?
+                            Apa itu Gini Ratio?
                         </button>
                     @endif
                 </div>
@@ -155,7 +155,8 @@
                     <textarea
                         id="chatbotInput" aria-label="Pertanyaan tentang publikasi"
                         rows="1"
-                        placeholder="Tanya data statistik, letak publikasi, atau isi buku..."
+                        maxlength="1000"
+                        placeholder="Tanya bebas: mis. 'ada data kemiskinan 2026?'"
                         class="w-full bg-transparent px-3.5 py-2.5 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none resize-none max-h-24 leading-relaxed"></textarea>
                 </div>
                 <button
@@ -167,8 +168,8 @@
                 </button>
             </form>
             <div class="flex items-center justify-between mt-2 px-1 text-[10px] text-slate-400 font-medium">
-                <span>{{ config('services.gemini.api_key') ? 'Didukung oleh Google Gemini AI' : 'Jawaban berbasis katalog publikasi' }}</span>
-                <span class="hidden sm:inline">Tekan Enter untuk kirim</span>
+                <span>{{ config('services.gemini.api_key') ? 'Didukung Google Gemini AI' : 'Jawaban berbasis katalog publikasi' }} · Jawaban AI dapat keliru, verifikasi di dokumen sumber</span>
+                <span class="hidden sm:inline">Enter untuk kirim</span>
             </div>
         </div>
 
@@ -426,6 +427,40 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPublicationTitle = root.dataset.publicationTitle || '';
     let chatHistory = [];
     let isWaitingResponse = false;
+    let suggestionsLoaded = false;
+
+    // Render chip saran pertanyaan dari server.
+    function renderSuggestionChips(items) {
+        const list = document.getElementById('quickChipsList');
+        if (!list || !Array.isArray(items) || items.length === 0) return;
+
+        list.innerHTML = '';
+        items.slice(0, 4).forEach(function(text) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'quick-chip bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs transition-all text-left';
+            btn.textContent = text;
+            list.appendChild(btn);
+        });
+    }
+
+    // Ambil saran pertanyaan yang sesuai dengan isi katalog.
+    async function loadSuggestions() {
+        if (suggestionsLoaded) return;
+        suggestionsLoaded = true;
+
+        try {
+            const base = '{{ route("chatbot.suggestions") }}';
+            const url = currentPublicationId ? base + '?publication_id=' + encodeURIComponent(currentPublicationId) : base;
+            const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) return;
+
+            const data = await response.json();
+            renderSuggestionChips(data.suggestions);
+        } catch (error) {
+            // Biarkan saran bawaan (server-side) bila permintaan gagal.
+        }
+    }
 
     // Toggle Chat Window
     function openChat() {
@@ -433,6 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnToggle.setAttribute('aria-expanded', 'true');
         chatWindow.classList.remove('hidden');
         chatWindow.classList.add('flex');
+        loadSuggestions();
         setTimeout(() => {
             chatWindow.classList.remove('scale-95', 'opacity-0');
             chatWindow.classList.add('scale-100', 'opacity-100');
@@ -473,7 +509,9 @@ document.addEventListener('DOMContentLoaded', function() {
             contextText.innerHTML = 'Mode Asisten Universal: Menjelajahi seluruh katalog publikasi BPS';
             modeBadge.innerHTML = '<i data-lucide="globe" class="w-3 h-3 text-cyan-300"></i><span>Asisten Universal BPS</span>';
             btnSwitchUniversal.classList.add('hidden');
-            if (window.lucide) if (window.lucide) window.lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
+            suggestionsLoaded = false;
+            loadSuggestions();
             appendBotMessage("Beralih ke **Mode Universal BPS**. Sekarang Anda dapat menanyakan letak data atau publikasi apa pun dari seluruh katalog!");
         });
     }
@@ -557,7 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         messagesContainer.insertBefore(div, typingIndicator);
-        if (window.lucide) if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
         scrollToBottom();
     }
 
@@ -788,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize Lucide icons
     if (window.lucide) {
-        if (window.lucide) window.lucide.createIcons();
+        window.lucide.createIcons();
     }
 });
 </script>

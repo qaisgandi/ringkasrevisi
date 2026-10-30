@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands([
         \App\Console\Commands\CreateAdminUser::class,
     ])
+    // Listener di app/Listeners (mis. RecordAuthActivity) didaftarkan otomatis
+    // berdasarkan tipe event pada parameter method-nya.
+    ->withEvents(discover: true)
     ->withBindings([
         BladeCompiler::class => function ($app) {
             return new BladeCompiler(
@@ -24,6 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di belakang proxy (mis. Vercel) IP klien asli ada di X-Forwarded-For.
+        // Tanpa ini semua kunjungan tercatat sebagai IP proxy dan wilayah tidak akurat.
+        if (filter_var(env('TRUST_PROXIES', false), FILTER_VALIDATE_BOOL)) {
+            $middleware->trustProxies(at: '*');
+        }
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'track.visit' => \App\Http\Middleware\TrackVisit::class,

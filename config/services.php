@@ -45,4 +45,12 @@ return [
         'serverless' => (bool) env('VERCEL', false),
     ],
 
+    'geoip' => [
+        // Lookup wilayah mengirim IP pengunjung ke penyedia pihak ketiga;
+        // aktifkan secara sadar melalui GEOIP_ENABLED=true.
+        'enabled' => (bool) env('GEOIP_ENABLED', false),
+        'endpoint' => env('GEOIP_ENDPOINT', 'https://ipapi.co/{ip}/json/'),
+        'timeout' => (int) env('GEOIP_TIMEOUT', 3),
+    ],
+
 ];

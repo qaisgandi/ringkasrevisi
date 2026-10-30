@@ -105,6 +105,11 @@ class UserAuthController extends Controller
             'is_read' => false,
         ]);
 
+        // Catat registrasi untuk statistik dashboard. Login otomatis di bawah
+        // tidak perlu dicatat lagi sebagai event terpisah.
+        app(\App\Services\VisitTracker::class)->record($request, \App\Services\VisitTracker::REGISTER, null, $user->id);
+        $request->attributes->set('visit.login.already_recorded', true);
+
         Auth::login($user);
 
         return redirect()->route('home')->with('success', 'Akun berhasil didaftarkan! Selamat datang di RINGKAS.');
@@ -256,17 +261,11 @@ class UserAuthController extends Controller
         }
 
         try {
-            $geo = app(\App\Services\IpGeolocationService::class)->locate($request->ip());
-            \App\Models\VisitLog::create([
-                'user_id' => Auth::id(),
-                'publication_id' => $publication->id,
-                'event_type' => 'download',
-                'ip_address' => $request->ip(),
-                'region' => $geo['region'] ?? 'Tidak diketahui',
-                'city' => $geo['city'] ?? null,
-                'user_agent' => substr((string) $request->userAgent(), 0, 500),
-                'url' => substr('/' . ltrim($request->path(), '/'), 0, 500),
-            ]);
+            app(\App\Services\VisitTracker::class)->record(
+                $request,
+                \App\Services\VisitTracker::DOWNLOAD,
+                $publication->id
+            );
         } catch (\Throwable $e) {
             // Kegagalan pencatatan tidak boleh memblokir unduhan.
         }

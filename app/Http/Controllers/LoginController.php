@@ -124,45 +124,79 @@ class LoginController extends Controller
         $visitStats = [
             'totalVisits' => 0,
             'totalDownloads' => 0,
+            'totalLogins' => 0,
             'uniqueVisitors' => 0,
             'visitsByDay' => [],
             'visitsByRegion' => [],
             'topPublications' => collect(),
             'recentVisits' => collect(),
+            'trackingAvailable' => false,
         ];
 
         try {
-            $visitStats['totalVisits'] = \App\Models\VisitLog::where('event_type', 'view')->count();
-            $visitStats['totalDownloads'] = \App\Models\VisitLog::where('event_type', 'download')->count();
-            $visitStats['uniqueVisitors'] = \App\Models\VisitLog::whereNotNull('ip_address')
-                ->distinct()->count('ip_address');
+            $visitLogs = \App\Models\VisitLog::query();
+
+            $visitStats['totalVisits'] = (clone $visitLogs)->where('event_type', 'view')->count();
+            $visitStats['totalDownloads'] = (clone $visitLogs)->where('event_type', 'download')->count();
+            $visitStats['totalLogins'] = (clone $visitLogs)->where('event_type', 'login')->count();
+            $visitStats['uniqueVisitors'] = (clone $visitLogs)
+                ->whereNotNull('ip_address')
+                ->whereIn('event_type', ['view', 'login'])
+                ->distinct()
+                ->count('ip_address');
+
+            // 1. Kunjungan 7 hari terakhir (termasuk hari ini), dihitung di database.
+            $dailyCounts = (clone $visitLogs)
+                ->selectRaw('DATE(created_at) as visit_date, COUNT(*) as total')
+                ->whereIn('event_type', ['view', 'login'])
+                ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+                ->groupByRaw('DATE(created_at)')
+                ->pluck('total', 'visit_date');
 
             for ($i = 6; $i >= 0; $i--) {
-                $date = now()->subDays($i);
-                $visitStats['visitsByDay'][$date->format('d M')] = \App\Models\VisitLog::where('event_type', 'view')
-                    ->whereDate('created_at', $date->toDateString())->count();
+                $date = now()->subDays($i)->startOfDay();
+                $visitStats['visitsByDay'][$date->format('d M')] = (int) ($dailyCounts[$date->toDateString()] ?? 0);
             }
 
-            $visitStats['visitsByRegion'] = \App\Models\VisitLog::selectRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui') as region, COUNT(*) as total")
-                ->where('event_type', 'view')
-                ->groupByRaw("COALESCE(NULLIF(region, ''), 'Tidak diketahui')")
+            // 2. Kunjungan per wilayah (top 8) — memakai kota/kabupaten pengakses,
+            //    dengan fallback ke provinsi bila kota tidak tersedia.
+            $locationLabel = "COALESCE(NULLIF(TRIM(city), ''), NULLIF(TRIM(region), ''), 'Tidak diketahui')";
+
+            $visitStats['visitsByRegion'] = (clone $visitLogs)
+                ->selectRaw("{$locationLabel} as region, COUNT(*) as total")
+                ->whereIn('event_type', ['view', 'login'])
+                ->groupByRaw($locationLabel)
                 ->orderByDesc('total')
                 ->limit(8)
                 ->get()
                 ->pluck('total', 'region')
                 ->toArray();
 
-            $visitStats['topPublications'] = \App\Models\VisitLog::selectRaw('publication_id, COUNT(*) as total')
+            // 3. Publikasi terpopuler (akses halaman detail + unduhan).
+            $visitStats['topPublications'] = (clone $visitLogs)
+                ->selectRaw('publication_id, COUNT(*) as total')
                 ->whereNotNull('publication_id')
+                ->whereIn('event_type', ['view', 'download'])
                 ->groupBy('publication_id')
                 ->orderByDesc('total')
                 ->limit(5)
                 ->with('publication')
                 ->get();
 
-            $visitStats['recentVisits'] = \App\Models\VisitLog::with('publication')->latest()->limit(10)->get();
+            // 4. Aktivitas terbaru: kunjungan, unduhan, login, dan registrasi.
+            $visitStats['recentVisits'] = \App\Models\VisitLog::with('user')
+                ->latest()
+                ->limit(10)
+                ->get();
+
+            $visitStats['trackingAvailable'] = true;
         } catch (\Illuminate\Database\QueryException $e) {
-            // Dashboard tetap bisa dibuka sebelum migrasi visit_logs dijalankan.
+            // Dashboard tetap bisa dibuka sebelum migrasi visit_logs dijalankan,
+            // tetapi kegagalannya tercatat agar bisa segera diperbaiki.
+            \Illuminate\Support\Facades\Log::warning('dashboard.visit_stats_unavailable', [
+                'exception' => $e::class,
+                'reason' => $e->errorInfo[0] ?? (string) $e->getCode(),
+            ]);
         }
 
         return view('admin.dashboard', [

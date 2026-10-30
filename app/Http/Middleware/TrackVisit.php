@@ -2,19 +2,36 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\VisitLog;
-use App\Services\IpGeolocationService;
+use App\Services\VisitTracker;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackVisit
 {
+    /** Kunjungan ulang ke halaman yang sama dihitung lagi setelah jeda ini. */
+    private const WINDOW_SECONDS = 15 * 60;
+
+    /** Halaman publik yang dianggap sebagai kunjungan pembaca. */
+    private const TRACKED_ROUTES = [
+        'landing',
+        'home',
+        'profile',
+        'login',
+        'register',
+        'user.publications.show',
+    ];
+
+    public function __construct(private readonly VisitTracker $tracker)
+    {
+    }
+
     /**
-     * Catat kunjungan halaman user (1x per session per halaman).
-     * Hanya untuk GET pada landing, home, dan user.publications.show agar
-     * request chatbot/download tidak ikut tercatat sebagai view.
+     * Catat kunjungan halaman publik.
+     *
+     * Deduplikasi memakai jendela 15 menit per halaman per session: refresh
+     * beruntun tidak menggelembungkan angka, tetapi kunjungan ulang setelah
+     * jeda tetap tercatat.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -25,7 +42,7 @@ class TrackVisit
         }
 
         $routeName = $request->route()?->getName();
-        if (!in_array($routeName, ['landing', 'home', 'user.publications.show'], true)) {
+        if (!in_array($routeName, self::TRACKED_ROUTES, true)) {
             return $response;
         }
 
@@ -35,30 +52,31 @@ class TrackVisit
             $publicationId = is_object($publication) ? $publication->id : (int) $publication;
         }
 
-        // Deduplikasi: 1x per session per halaman.
-        $sessionKey = 'visited:' . $routeName . ':' . ($publicationId ?? 'home');
-        if ($request->session()->has($sessionKey)) {
+        $sessionKey = 'visited:' . $routeName . ':' . ($publicationId ?? 'index');
+        $now = now()->getTimestamp();
+
+        // Simpan semua penanda dalam satu kunci dan buang yang sudah kedaluwarsa,
+        // agar cookie session (SESSION_DRIVER=cookie di Vercel) tidak membengkak.
+        $visited = $request->session()->get('visited_pages', []);
+        if (!is_array($visited)) {
+            $visited = [];
+        }
+
+        $visited = array_filter(
+            $visited,
+            fn ($timestamp) => is_numeric($timestamp) && ($now - (int) $timestamp) < self::WINDOW_SECONDS
+        );
+
+        if (isset($visited[$sessionKey])) {
+            $request->session()->put('visited_pages', $visited);
+
             return $response;
         }
-        $request->session()->put($sessionKey, true);
 
-        try {
-            $ip = $request->ip();
-            $geo = app(IpGeolocationService::class)->locate($ip);
+        $visited[$sessionKey] = $now;
+        $request->session()->put('visited_pages', $visited);
 
-            VisitLog::create([
-                'user_id' => Auth::id(),
-                'publication_id' => $publicationId,
-                'event_type' => 'view',
-                'ip_address' => $ip,
-                'region' => $geo['region'] ?? 'Tidak diketahui',
-                'city' => $geo['city'] ?? null,
-                'user_agent' => substr((string) $request->userAgent(), 0, 500),
-                'url' => substr('/' . ltrim($request->path(), '/'), 0, 500),
-            ]);
-        } catch (\Exception $e) {
-            // Tracking tidak boleh menggagalkan request utama.
-        }
+        $this->tracker->record($request, VisitTracker::VIEW, $publicationId);
 
         return $response;
     }

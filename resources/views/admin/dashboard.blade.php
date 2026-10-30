@@ -105,16 +105,27 @@
     </div>
 
     <!-- SECTION 2B: MONITORING KUNJUNGAN USER UMUM -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 rk-visit-stats">
+    @if(($visitStats['trackingAvailable'] ?? false) === false)
+    <div class="rounded-xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-800">
+        <strong class="font-bold">Pencatatan kunjungan belum aktif.</strong>
+        Tabel <code>visit_logs</code> belum tersedia di database. Jalankan <code>php artisan migrate --force</code> agar kunjungan, unduhan, dan login tercatat otomatis.
+    </div>
+    @endif
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 rk-visit-stats">
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
             <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan Halaman</p><span class="rk-visit-icon"><i data-lucide="eye" aria-hidden="true"></i></span></div>
             <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalVisits'] ?? 0 }}</h3>
-            <p class="text-[11px] text-slate-400 font-medium mt-1">Event view (Beranda & Detail)</p>
+            <p class="text-[11px] text-slate-400 font-medium mt-1">Beranda, detail publikasi &amp; login</p>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
             <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Download Dokumen</p><span class="rk-visit-icon"><i data-lucide="download" aria-hidden="true"></i></span></div>
             <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalDownloads'] ?? 0 }}</h3>
             <p class="text-[11px] text-slate-400 font-medium mt-1">Via tombol Download PDF</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
+            <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Login Pengguna</p><span class="rk-visit-icon"><i data-lucide="log-in" aria-hidden="true"></i></span></div>
+            <h3 class="heading-font text-3xl font-black text-bps-navy mt-2">{{ $visitStats['totalLogins'] ?? 0 }}</h3>
+            <p class="text-[11px] text-slate-400 font-medium mt-1">Login berhasil user umum &amp; admin</p>
         </div>
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 rk-visit-stat">
             <div class="rk-visit-stat-label"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pengunjung Unik</p><span class="rk-visit-icon"><i data-lucide="users-round" aria-hidden="true"></i></span></div>
@@ -139,15 +150,16 @@
             @if(array_sum(($visitStats['visitsByDay'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByDay'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
         </div>
         <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 flex flex-col min-h-[350px]">
-            <h3 class="heading-font text-base font-bold text-slate-800 mb-4 pb-3 border-b border-slate-50 rk-area-title">
+            <h3 class="heading-font text-base font-bold text-slate-800 mb-2 pb-3 border-b border-slate-50 rk-area-title">
                 <i data-lucide="map-pinned" aria-hidden="true"></i>
                 <span>Kunjungan per Wilayah (Top 8)</span>
             </h3>
+            <p class="text-[11px] text-slate-400 font-medium -mt-1 mb-3">Berdasarkan kota/kabupaten pengakses (fallback provinsi)</p>
             <div class="flex-1 relative flex items-center justify-center min-h-[220px]">
                 @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)
                 <canvas id="visitsRegionChart" role="img" aria-label="Grafik data data wilayah — nilai tersedia pada rincian di bawah"></canvas>
                 @else
-                <x-empty-state title="Belum ada data wilayah" description="Distribusi wilayah akan tampil ketika data kunjungan tersedia." />
+                <x-empty-state title="Belum ada data wilayah" description="Distribusi kota/kabupaten pengakses akan tampil setelah kunjungan tercatat." />
                 @endif
             </div>
             @if(array_sum(($visitStats['visitsByRegion'] ?? [])) > 0)<details class="rk-chart-data"><summary>Lihat rincian data</summary><dl>@foreach(($visitStats['visitsByRegion'] ?? []) as $label => $value)<dt>{{ $label }}</dt><dd>{{ $value }}</dd>@endforeach</dl></details>@endif
@@ -194,6 +206,7 @@
                         <tr class="bg-slate-50/70 border-b border-slate-100">
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Waktu</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Event</th>
+                            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Pengguna</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Wilayah</th>
                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">IP</th>
                         </tr>
@@ -202,17 +215,18 @@
                         @forelse (($visitStats['recentVisits'] ?? collect()) as $log)
                             <tr class="hover:bg-slate-50/50 transition-colors">
                                 <td class="px-6 py-4 text-slate-500 font-medium whitespace-nowrap">{{ $log->created_at?->format('d-m-Y H:i') }}</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold {{ $log->event_type === 'download' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700' }}">
-                                        {{ $log->event_type }}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold {{ $log->eventBadgeClass() }}">
+                                        {{ $log->eventLabel() }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-slate-600 font-medium">{{ $log->region ?? '-' }}{{ $log->city ? ' / ' . $log->city : '' }}</td>
-                                <td class="px-6 py-4 text-slate-400 font-medium">{{ $log->maskedIp() }}</td>
+                                <td class="px-6 py-4 text-slate-700 font-semibold whitespace-nowrap">{{ $log->actorLabel() }}</td>
+                                <td class="px-6 py-4 text-slate-600 font-medium whitespace-nowrap">{{ $log->locationLabel() }}</td>
+                                <td class="px-6 py-4 text-slate-400 font-medium whitespace-nowrap">{{ $log->maskedIp() }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-slate-400 font-semibold italic">Belum ada aktivitas.</td>
+                                <td colspan="5" class="px-6 py-8 text-center text-slate-400 font-semibold italic">Belum ada aktivitas.</td>
                             </tr>
                         @endforelse
                     </tbody>

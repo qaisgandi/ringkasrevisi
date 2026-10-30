@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Publication;
+use App\Services\Chatbot\PublicationCatalog;
 use App\Services\GeminiChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,9 +12,12 @@ class ChatbotController extends Controller
 {
     protected $chatService;
 
-    public function __construct(GeminiChatService $chatService)
+    protected PublicationCatalog $catalog;
+
+    public function __construct(GeminiChatService $chatService, PublicationCatalog $catalog)
     {
         $this->chatService = $chatService;
+        $this->catalog = $catalog;
     }
 
     /**
@@ -62,25 +66,23 @@ class ChatbotController extends Controller
                     'category' => $publication->category,
                     'year' => $publication->year,
                     'suggestions' => [
-                        "Apa kesimpulan utama dokumen ini?",
-                        "Sebutkan indikator statistik terpenting di publikasi ini.",
-                        "Jelaskan tren data yang terjadi pada publikasi ini.",
-                        "Apa poin-poin penting yang perlu saya ketahui?",
+                        'Apa kesimpulan utama dokumen ini?',
+                        'Sebutkan indikator statistik terpenting di publikasi ini.',
+                        'Di halaman berapa topik utama dibahas?',
+                        'Jelaskan tren data yang terjadi pada publikasi ini.',
                     ]
                 ]);
             }
         }
 
-        // Mode Universal Global
+        // Mode Universal Global — saran disesuaikan dengan isi katalog saat ini.
+        $stats = $this->catalog->stats();
+
         return response()->json([
             'mode' => 'universal',
             'title' => 'Katalog Publikasi BPS',
-            'suggestions' => [
-                "Ada di publikasi mana data IPM terbaru?",
-                "Di mana saya bisa melihat data kemiskinan dan inflasi?",
-                "Publikasi apa saja yang tersedia untuk tahun 2024?",
-                "Apa itu Gini Ratio dan bagaimana cara membacanya?",
-            ]
+            'total' => $stats['total'],
+            'suggestions' => $this->catalog->suggestions(),
         ]);
     }
 }

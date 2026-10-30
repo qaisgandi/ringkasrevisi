@@ -26,9 +26,9 @@ Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.logi
 Route::post('/admin/logout', [LoginController::class, 'logout'])->name('admin.logout');
 
 // Portal Otentikasi User Umum
-Route::get('/login', [UserAuthController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [UserAuthController::class, 'showLoginForm'])->middleware('track.visit')->name('login');
 Route::post('/login', [UserAuthController::class, 'login'])->name('login.post');
-Route::get('/register', [UserAuthController::class, 'showRegisterForm'])->name('register');
+Route::get('/register', [UserAuthController::class, 'showRegisterForm'])->middleware('track.visit')->name('register');
 Route::post('/register', [UserAuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 
