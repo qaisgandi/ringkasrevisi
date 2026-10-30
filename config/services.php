@@ -46,6 +46,8 @@ return [
     ],
 
     'geoip' => [
+        // Vercel supplies these headers without an external IP lookup.
+        'use_vercel_headers' => (bool) env('VERCEL', false),
         // Lookup wilayah mengirim IP pengunjung ke penyedia pihak ketiga;
         // aktifkan secara sadar melalui GEOIP_ENABLED=true.
         'enabled' => (bool) env('GEOIP_ENABLED', false),

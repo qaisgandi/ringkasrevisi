@@ -268,6 +268,10 @@ class UserAuthController extends Controller
             );
         } catch (\Throwable $e) {
             // Kegagalan pencatatan tidak boleh memblokir unduhan.
+            \Illuminate\Support\Facades\Log::warning('Download tracking could not save an event.', [
+                'exception' => $e::class,
+                'publication_id' => $publication->id,
+            ]);
         }
 
         $filename = \Illuminate\Support\Str::slug(substr($publication->title, 0, 60)) . '.pdf';

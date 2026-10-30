@@ -6,7 +6,10 @@ use App\Models\Publication;
 use App\Models\User;
 use App\Models\VisitLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -142,15 +145,90 @@ class RedesignedViewsTest extends TestCase
 
         Storage::disk('public')->put($publication->pdf_path, '%PDF-test');
 
-        $this->actingAs($user)
+        $this->withSession(['visited:user.publications.show:' . $publication->id => true])
+            ->actingAs($user)
             ->get('/publications/' . $publication->id)
             ->assertOk();
         $this->get('/publications/' . $publication->id)->assertOk();
         $this->get('/publications/' . $publication->id . '/download')
             ->assertDownload('dokumen-statistik.pdf');
 
-        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'A page is counted once per session.');
+        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'Reloads within the visit cooldown do not inflate the count.');
         $this->assertSame(1, VisitLog::where('event_type', 'download')->count());
+
+        $this->travel(6)->minutes();
+        $this->get('/publications/' . $publication->id)->assertOk();
+        $this->assertSame(2, VisitLog::where('event_type', 'view')->count(), 'A return visit is counted after the cooldown.');
+    }
+
+    public function test_admin_visit_dashboard_aggregates_recent_visits_and_renders_popular_and_recent_activity(): void
+    {
+        Carbon::setTestNow('2026-10-30 12:00:00');
+
+        try {
+            $admin = User::create([
+                'name' => 'Admin Statistik',
+                'username' => 'admin-statistik',
+                'email' => 'admin-statistik@example.test',
+                'password' => Hash::make('temporary-test-password'),
+                'role' => 'admin',
+            ]);
+            $publication = Publication::create([
+                'title' => 'Publikasi Paling Sering Dibaca',
+                'category' => 'Statistik Sosial',
+                'year' => 2026,
+                'release_date' => '2026-01-01',
+                'pdf_path' => 'publications/most-read.pdf',
+                'summary' => 'Ringkasan uji.',
+                'status' => 'Selesai',
+            ]);
+
+            foreach ([
+                ['2026-10-30 10:00:00', 'Jawa Barat'],
+                ['2026-10-29 10:00:00', 'Jawa Barat'],
+                ['2026-10-20 10:00:00', 'DKI Jakarta'],
+            ] as $index => [$createdAt, $region]) {
+                $visit = VisitLog::create([
+                    'publication_id' => $publication->id,
+                    'event_type' => 'view',
+                    'ip_address' => '203.0.113.' . ($index + 1),
+                    'region' => $region,
+                    'url' => '/publications/' . $publication->id,
+                ]);
+                $visit->forceFill(['created_at' => Carbon::parse($createdAt)])->save();
+            }
+
+            $response = $this->actingAs($admin)->get('/admin/dashboard')->assertOk();
+            $response->assertViewHas('visitStats', function (array $stats) use ($publication) {
+                return $stats['visitsByDay']['30 Oct'] === 1
+                    && $stats['visitsByDay']['29 Oct'] === 1
+                    && !isset($stats['visitsByDay']['20 Oct'])
+                    && $stats['visitsByRegion']['Jawa Barat'] === 2
+                    && $stats['topPublications']->first()->publication_id === $publication->id
+                    && $stats['recentVisits']->count() === 3;
+            });
+            $response->assertSee('Publikasi Terpopuler')
+                ->assertSee('Aktivitas Terbaru')
+                ->assertSee('Publikasi Paling Sering Dibaca')
+                ->assertSee('Jawa Barat');
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_visit_geolocation_uses_vercel_region_headers_without_external_lookup(): void
+    {
+        Config::set('services.geoip.use_vercel_headers', true);
+        $request = Request::create('/', 'GET', [], [], [], [
+            'HTTP_X_VERCEL_IP_COUNTRY' => 'ID',
+            'HTTP_X_VERCEL_IP_COUNTRY_REGION' => 'JB',
+            'HTTP_X_VERCEL_IP_CITY' => 'Bandung%20Kota',
+        ]);
+
+        $location = app(\App\Services\IpGeolocationService::class)->locateRequest($request);
+
+        $this->assertSame('Jawa Barat', $location['region']);
+        $this->assertSame('Bandung Kota', $location['city']);
     }
 
     public function test_chatbot_routes_return_suggestions_and_a_safe_fallback_without_an_api_key(): void

@@ -46,7 +46,7 @@ class VisitTracker
         $ipAddress = $request->ip();
 
         try {
-            $location = $this->geolocation->locate($ipAddress);
+            $location = $this->geolocation->locateRequest($request);
 
             return VisitLog::create([
                 'user_id' => $userId ?? Auth::id(),

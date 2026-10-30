@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publication;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LoginController extends Controller
 {
@@ -162,15 +163,20 @@ class LoginController extends Controller
             //    dengan fallback ke provinsi bila kota tidak tersedia.
             $locationLabel = "COALESCE(NULLIF(TRIM(city), ''), NULLIF(TRIM(region), ''), 'Tidak diketahui')";
 
-            $visitStats['visitsByRegion'] = (clone $visitLogs)
+            $regionCounts = [];
+            (clone $visitLogs)
                 ->selectRaw("{$locationLabel} as region, COUNT(*) as total")
                 ->whereIn('event_type', ['view', 'login'])
                 ->groupByRaw($locationLabel)
                 ->orderByDesc('total')
                 ->limit(8)
                 ->get()
-                ->pluck('total', 'region')
-                ->toArray();
+                ->each(function ($row) use (&$regionCounts) {
+                    $region = trim((string) $row->region);
+                    $region = $region !== '' ? $region : 'Tidak diketahui';
+                    $regionCounts[$region] = (int) $row->total;
+                });
+            $visitStats['visitsByRegion'] = $regionCounts;
 
             // 3. Publikasi terpopuler (akses halaman detail + unduhan).
             $visitStats['topPublications'] = (clone $visitLogs)
@@ -184,18 +190,18 @@ class LoginController extends Controller
                 ->get();
 
             // 4. Aktivitas terbaru: kunjungan, unduhan, login, dan registrasi.
-            $visitStats['recentVisits'] = \App\Models\VisitLog::with('user')
+            $visitStats['recentVisits'] = \App\Models\VisitLog::with(['publication', 'user'])
                 ->latest()
                 ->limit(10)
                 ->get();
 
             $visitStats['trackingAvailable'] = true;
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (\Throwable $e) {
             // Dashboard tetap bisa dibuka sebelum migrasi visit_logs dijalankan,
             // tetapi kegagalannya tercatat agar bisa segera diperbaiki.
             \Illuminate\Support\Facades\Log::warning('dashboard.visit_stats_unavailable', [
                 'exception' => $e::class,
-                'reason' => $e->errorInfo[0] ?? (string) $e->getCode(),
+                'reason' => $e instanceof \Illuminate\Database\QueryException ? ($e->errorInfo[0] ?? (string) $e->getCode()) : $e->getMessage(),
             ]);
         }
 
