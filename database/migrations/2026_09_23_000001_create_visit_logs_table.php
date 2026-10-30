@@ -8,6 +8,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Production may already contain this table even if its migration record
+        // was lost; keep the deployment migration safe to retry in that case.
+        if (Schema::hasTable('visit_logs')) {
+            return;
+        }
+
         Schema::create('visit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
