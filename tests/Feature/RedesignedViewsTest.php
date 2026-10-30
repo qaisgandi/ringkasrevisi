@@ -145,15 +145,20 @@ class RedesignedViewsTest extends TestCase
 
         Storage::disk('public')->put($publication->pdf_path, '%PDF-test');
 
-        $this->actingAs($user)
+        $this->withSession(['visited:user.publications.show:' . $publication->id => true])
+            ->actingAs($user)
             ->get('/publications/' . $publication->id)
             ->assertOk();
         $this->get('/publications/' . $publication->id)->assertOk();
         $this->get('/publications/' . $publication->id . '/download')
             ->assertDownload('dokumen-statistik.pdf');
 
-        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'A page is counted once per session.');
+        $this->assertSame(1, VisitLog::where('event_type', 'view')->count(), 'Reloads within the visit cooldown do not inflate the count.');
         $this->assertSame(1, VisitLog::where('event_type', 'download')->count());
+
+        $this->travel(6)->minutes();
+        $this->get('/publications/' . $publication->id)->assertOk();
+        $this->assertSame(2, VisitLog::where('event_type', 'view')->count(), 'A return visit is counted after the cooldown.');
     }
 
     public function test_admin_visit_dashboard_aggregates_recent_visits_and_renders_popular_and_recent_activity(): void

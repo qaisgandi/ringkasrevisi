@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 class TrackVisit
 {
     /**
-     * Catat kunjungan halaman user (1x per session per halaman).
+     * Catat kunjungan halaman user, dengan deduplikasi 5 menit per halaman/sesi.
      * Hanya untuk GET pada landing, home, dan user.publications.show agar
      * request chatbot/download tidak ikut tercatat sebagai view.
      */
@@ -36,12 +36,13 @@ class TrackVisit
             $publicationId = is_object($publication) ? $publication->id : (int) $publication;
         }
 
-        // Deduplikasi: 1x per session per halaman.
-        $sessionKey = 'visited:' . $routeName . ':' . ($publicationId ?? 'home');
-        if ($request->session()->has($sessionKey)) {
+        // Gunakan kunci baru agar penanda sesi lama (yang berlaku selamanya)
+        // tidak terus menahan statistik setelah pembaruan aplikasi.
+        $sessionKey = 'visit:last-recorded:' . $routeName . ':' . ($publicationId ?? 'home');
+        $lastRecordedAt = (int) $request->session()->get($sessionKey, 0);
+        if ($lastRecordedAt > 0 && now()->timestamp - $lastRecordedAt < 300) {
             return $response;
         }
-        $request->session()->put($sessionKey, true);
 
         try {
             $ip = $request->ip();
@@ -57,6 +58,7 @@ class TrackVisit
                 'user_agent' => substr((string) $request->userAgent(), 0, 500),
                 'url' => substr('/' . ltrim($request->path(), '/'), 0, 500),
             ]);
+            $request->session()->put($sessionKey, now()->timestamp);
         } catch (\Throwable $e) {
             // Tracking tidak boleh menggagalkan request utama.
             Log::warning('Visit tracking could not save an event.', [
